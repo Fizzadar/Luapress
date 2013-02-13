@@ -1,0 +1,4 @@
+<h2><a href="<?=self:get( 'url' ) ?>/posts/<?=self:get( 'post' ).link ?>">Post: <?=self:get( 'post' ).title ?></a></h2>
+<p>Time: <?=self:get( 'post' ).time ?></p>
+<?=self:get( 'url' ) ?>
+<?=self:get( 'post' ).content ?>

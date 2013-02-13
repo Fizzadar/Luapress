@@ -1,0 +1,4 @@
+<h1><a href="<?=self:get( 'url' ) ?>">blog title</a></h1>
+<? for k, v in pairs( self:get( 'pages' ) ) do ?>
+    <a href="<?=self:get( 'url' ) ?>/pages/<?=v.link ?>"><?=v.title ?></a><br />
+<? end ?>
