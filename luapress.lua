@@ -13,9 +13,6 @@ local require, print, error, table = require, print, error, table
 
 --config & fix missing bits
 local config = require( 'config' )
-config.url = config.url or ''
-config.template = config.template or 'default'
-config.title = config.title or 'Luapress blog'
 
 --modules
 local lfs = require( 'lfs' )
@@ -29,6 +26,10 @@ local templates = {}
 local posts = {}
 local pages = {}
 
+--setup our global template opts
+template:set( 'title', config.title )
+template:set( 'url', config.url )
+
 --get templates
 for file in lfs.dir( 'templates/' .. config.template .. '/' ) do
     if file:sub( -5 ) == 'lhtml' then
@@ -36,21 +37,17 @@ for file in lfs.dir( 'templates/' .. config.template .. '/' ) do
         if not f then error( err ) end
         local s, err = f:read( '*a' )
         if not s then error( err ) end
+        f:close()
 
         templates[file:sub( 0, -7 )] = s
     end
 end
 
---setup our global template opts
-template:set( 'title', config.title )
-template:set( 'url', config.url )
-template:set( 'pages', pages )
-
 --get posts
 for file in lfs.dir( 'posts/' ) do
     if file:sub( -3 ) == '.md' then
         --work out title
-        local title = file:sub( 0, -4 ):gsub( '%s', '_' )
+        local title = file:sub( 0, -4 )
         local link = title:gsub( '%s', '_' ) .. '.html'
         file = 'posts/' .. file
 
@@ -112,7 +109,24 @@ for file in lfs.dir( 'pages/' ) do
     end
 end
 
---begin generation of posts
+
+--function to be used below to display list of <li> for pages
+function luapress_page_links( active )
+    local output = ''
+    for k, page in pairs( pages ) do
+        if page.link == active then
+            output = '<li class="active"><a href="' .. config.url .. '/pages/' .. active .. '">' .. page.title .. '</a></li>\n'
+        else
+            output = '<li><a href="' .. config.url .. '/pages/' .. page.link .. '">' .. page.title .. '</a></li>\n'
+        end
+    end
+    return output
+end
+template:set( 'page_links', luapress_page_links() )
+
+
+
+--begin generation of post pages
 for k, post in pairs( posts ) do
     --is there a file already there?!
     local f = io.open( 'build/posts/' .. post.link, 'r' )
@@ -126,15 +140,20 @@ for k, post in pairs( posts ) do
         if not f then error( err ) end
         local result, err = f:write( output )
         if not result then error( err ) end
+
+        f:close()
     end
 end
 
---begin generation of pages
+--begin generation of page pages
 for k, page in pairs( pages ) do
     --is there a file already there?!
     local f = io.open( 'build/pages/' .. page.link, 'r' )
 
     if not f or ( arg[1] and arg[1] == 'all' ) then
+        --we're a page, so change up page_links
+        template:set( 'page_links', luapress_page_links( page.link ) )
+
         template:set( 'page', page )
 
         local output = template:process( templates.header ) .. page.output .. template:process( templates.footer )
@@ -143,19 +162,100 @@ for k, page in pairs( pages ) do
         if not f then error( err ) end
         local result, err = f:write( output )
         if not result then error( err ) end
+
+        f:close()
     end
 end
 
 
---generate index
-local f, err = io.open( 'build/index.html', 'w' )
-if not f then error( err ) end
---add header, posts, footer
-local output = template:process( templates.header )
-for k, v in pairs( posts ) do
-    output = output .. v.output
+
+--reset page_links for indexes
+template:set( 'page_links', luapress_page_links() )
+
+--iterate to generate indexes
+local index = 1
+local count = 0
+local output = ''
+for k, post in pairs( posts ) do
+    --add post to output, increase count
+    output = output .. post.output
+    count = count + 1
+
+    --if we have n posts, create current index, reset
+    if count == config.posts_per_page then
+        --pick index file, open
+        local f, err
+        if index == 1 then
+            f, err = io.open( 'build/index.html', 'w' )
+        else
+            f, err = io.open( 'build/index' .. index .. '.html', 'w' )
+        end
+        if not f then error( err ) end
+
+        --work out previous page
+        if index > 1 then
+            if index == 2 then template:set( 'previous_page', 'index.html' ) else template:set( 'previous_page', 'index' .. index - 1 .. '.html' ) end
+        else
+            template:set( 'previous_page', false )
+        end
+        --work out next page
+        if #posts > k then
+            template:set( 'next_page', 'index' .. index + 1 .. '.html' )
+        else
+            template:set( 'next_page', false )
+        end
+
+        --create and write output
+        output = template:process( templates.header ) .. output .. template:process( templates.footer )
+        local result, err = f:write( output )
+        if not result then error( err ) end
+
+        --reset & close f
+        count = 0
+        index = index + 1
+        output = ''
+        f:close()
+    end
 end
-output = output .. template:process( templates.footer )
---write to file
-local result, err = f:write( output )
-if not result then error( err ) end
+
+
+
+
+--finally, copy over template's inc to build inc
+function copy_dir( dir, dest )
+    for file in lfs.dir( dir ) do
+        if file ~= '.' and file ~= '..' then
+            local attributes = lfs.attributes( dir .. file ) or {}
+            --directory?
+            if attributes.mode and attributes.mode == 'directory' then
+                --copy directory?
+                if not io.open( dest .. file, 'r' ) then
+                    lfs.mkdir( dest .. file )
+                end
+                copy_dir( dir .. file .. '/', dest .. file .. '/' )
+            end
+
+            --file?
+            if attributes.mode and attributes.mode == 'file' then
+                --do we have the file?
+                if not io.open( dest .. file, 'r' ) then
+                    --open current file
+                    local f, err = io.open( dir .. file, 'r' )
+                    if not f then error( err ) end
+                    --read file
+                    local s, err = f:read( '*a' )
+                    if not s then error( err ) end
+                    f:close()
+
+                    --open new file for creation
+                    local f, err = io.open( dest .. file, 'w' )
+                    local result, err = f:write( s )
+                    if not result then error( err ) end
+                    f:close()
+                end
+            end
+        end
+    end
+end
+copy_dir( 'inc/', 'build/inc/' )
+

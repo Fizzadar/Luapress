@@ -1,3 +1,4 @@
-<h2>Page: <?=self:get( 'post' ).title ?></h2>
-
-<?=self:get( 'post' ).content ?>
+<div class="post">
+    <h2><a href="<?=self:get( 'url' ) ?>/posts/<?=self:get( 'page' ).link ?>"><?=self:get( 'page' ).title ?></a></h2>
+    <div class="content"><?=self:get( 'page' ).content ?></div>
+</div>
