@@ -3,8 +3,10 @@ pages/*.md
 posts/*.md
 
 #post-build
-*.html
-*.css
+build/*.html
+build/pages/*.html
+build/posts/*.html
+build/inc/template/*.css
 *.png
 *.gif
 *.jpeg
