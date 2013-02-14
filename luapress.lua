@@ -48,7 +48,7 @@ for file in lfs.dir( 'posts/' ) do
     if file:sub( -3 ) == '.md' then
         --work out title
         local title = file:sub( 0, -4 )
-        local link = title:gsub( '%s', '_' ) .. '.html'
+        local link = title:gsub( ' ', '_' ):gsub( '[^_aA-zZ0-9]', '' ) .. '.html'
         file = 'posts/' .. file
 
         --get basic attributes
@@ -79,7 +79,7 @@ for file in lfs.dir( 'pages/' ) do
     if file:sub( -3 ) == '.md' then
         --work out title
         local title = file:sub( 0, -4 )
-        local link = title:gsub( '%s', '_' ) .. '.html'
+        local link = title:gsub( ' ', '_' ):gsub( '[^_aA-zZ0-9]', '' ) .. '.html'
         file = 'pages/' .. file
 
         --attributes
@@ -102,6 +102,18 @@ for file in lfs.dir( 'pages/' ) do
         table.insert( pages, page )
     end
 end
+--archive page/index
+template:set( 'posts', posts )
+table.insert( pages, { link = 'Archive.html', title = 'Archive', content = template:process( templates.archive ) } )
+
+
+
+--make sure we have our directories
+if not io.open( 'build/posts' ) and not lfs.mkdir( 'build/posts' ) then error( 'Cant make build/posts' ) end
+if not io.open( 'build/pages' ) and not lfs.mkdir( 'build/pages' ) then error( 'Cant make build/pages' ) end
+if not io.open( 'build/inc' ) and not lfs.mkdir( 'build/inc' ) then error( 'Cant make build/inc' ) end
+if not io.open( 'build/inc/template' ) and not lfs.mkdir( 'build/inc/template' ) then error( 'Cant make build/inc/template' ) end
+
 
 
 --function to be used below to display list of <li> for pages
@@ -117,7 +129,6 @@ function luapress_page_links( active )
     return output
 end
 template:set( 'page_links', luapress_page_links() )
-
 
 
 --begin generation of post pages
@@ -215,7 +226,6 @@ for k, post in pairs( posts ) do
         f:close()
     end
 end
-
 
 
 
