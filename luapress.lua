@@ -256,3 +256,4 @@ function copy_dir( dir, dest )
     end
 end
 copy_dir( 'inc/', 'build/inc/' )
+copy_dir( 'templates/' .. config.template .. '/inc/', 'build/inc/template/' )

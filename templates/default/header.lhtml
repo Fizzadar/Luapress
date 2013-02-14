@@ -12,7 +12,7 @@
     <link rel="icon" href="" type="image/x-icon" />
 
     <!--style-->
-    <link rel="stylesheet" href="<?=self:get( 'url' ) ?>/inc/style.css" />
+    <link rel="stylesheet" href="<?=self:get( 'url' ) ?>/inc/template/style.css" />
 
     <!--script-->
     <script type="text/javascript">
