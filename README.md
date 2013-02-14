@@ -13,5 +13,7 @@ Luapress is *yet another* static blog generator, written in Lua.
 + Run "lua luapress.lua" from shell
 + Copy contents of build/ to web
 
+**Options & Notes:**
 
-Luapress is designed to be simple and super easy to setup. The main file is only 258 lines long.
++ Add "all" to the end of the shell command to re-build all pages
++ The inc/ directory will be copied to build/inc/. Put poss content & template images/css here
