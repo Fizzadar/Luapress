@@ -1,4 +1,4 @@
 <div class="post">
-    <h2><a href="<?=self:get( 'url' ) ?>/posts/<?=self:get( 'page' ).link ?>"><?=self:get( 'page' ).title ?></a></h2>
+    <h2><?=self:get( 'page' ).title ?></h2>
     <div class="content"><?=self:get( 'page' ).content ?></div>
 </div>

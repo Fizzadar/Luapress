@@ -68,9 +68,6 @@ for file in lfs.dir( 'posts/' ) do
 
         --string => markdown
         post.content = markdown( s )
-        --set template data, get template output
-        template:set( 'post', post )
-        post.output = template:process( templates.post )
 
         --insert to posts
         table.insert( posts, post )
@@ -100,9 +97,6 @@ for file in lfs.dir( 'pages/' ) do
 
         --string => markdown
         page.content = markdown( s )
-        --set template data, get template output
-        template:set( 'page', page )
-        page.output = template:process( templates.page )
 
         --insert to pages
         table.insert( pages, page )
@@ -115,9 +109,9 @@ function luapress_page_links( active )
     local output = ''
     for k, page in pairs( pages ) do
         if page.link == active then
-            output = '<li class="active"><a href="' .. config.url .. '/pages/' .. active .. '">' .. page.title .. '</a></li>\n'
+            output = output .. '<li class="active"><a href="' .. config.url .. '/pages/' .. active .. '">' .. page.title .. '</a></li>\n'
         else
-            output = '<li><a href="' .. config.url .. '/pages/' .. page.link .. '">' .. page.title .. '</a></li>\n'
+            output = output .. '<li><a href="' .. config.url .. '/pages/' .. page.link .. '">' .. page.title .. '</a></li>\n'
         end
     end
     return output
@@ -127,14 +121,16 @@ template:set( 'page_links', luapress_page_links() )
 
 
 --begin generation of post pages
+template:set( 'single', true )
 for k, post in pairs( posts ) do
     --is there a file already there?!
     local f = io.open( 'build/posts/' .. post.link, 'r' )
 
     if not f or ( arg[1] and arg[1] == 'all' ) then
+        --set post
         template:set( 'post', post )
 
-        local output = template:process( templates.header ) .. post.output .. template:process( templates.footer )
+        local output = template:process( templates.header ) .. template:process( templates.post ) .. template:process( templates.footer )
 
         f, err = io.open( 'build/posts/' .. post.link, 'w' )
         if not f then error( err ) end
@@ -144,6 +140,7 @@ for k, post in pairs( posts ) do
         f:close()
     end
 end
+template:set( 'single', false )
 
 --begin generation of page pages
 for k, page in pairs( pages ) do
@@ -153,10 +150,10 @@ for k, page in pairs( pages ) do
     if not f or ( arg[1] and arg[1] == 'all' ) then
         --we're a page, so change up page_links
         template:set( 'page_links', luapress_page_links( page.link ) )
-
+        --set page
         template:set( 'page', page )
 
-        local output = template:process( templates.header ) .. page.output .. template:process( templates.footer )
+        local output = template:process( templates.header ) .. template:process( templates.page ) .. template:process( templates.footer )
 
         f, err = io.open( 'build/pages/' .. page.link, 'w' )
         if not f then error( err ) end
@@ -178,7 +175,8 @@ local count = 0
 local output = ''
 for k, post in pairs( posts ) do
     --add post to output, increase count
-    output = output .. post.output
+    template:set( 'post', post )
+    output = output .. template:process( templates.post )
     count = count + 1
 
     --if we have n posts, create current index, reset
@@ -221,7 +219,7 @@ end
 
 
 
---finally, copy over template's inc to build inc
+--finally, copy over inc to build inc
 function copy_dir( dir, dest )
     for file in lfs.dir( dir ) do
         if file ~= '.' and file ~= '..' then
@@ -238,7 +236,7 @@ function copy_dir( dir, dest )
             --file?
             if attributes.mode and attributes.mode == 'file' then
                 --do we have the file?
-                if not io.open( dest .. file, 'r' ) then
+                if not io.open( dest .. file, 'r' ) or arg[1] == 'all' then
                     --open current file
                     local f, err = io.open( dir .. file, 'r' )
                     if not f then error( err ) end
@@ -258,4 +256,3 @@ function copy_dir( dir, dest )
     end
 end
 copy_dir( 'inc/', 'build/inc/' )
-
