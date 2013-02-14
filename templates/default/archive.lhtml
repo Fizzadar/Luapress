@@ -1,0 +1,6 @@
+<? for k, post in pairs( self:get( 'posts' ) ) do ?>
+<div class="post">
+    <h2><a href="<?=self:get( 'url' ) ?>/posts/<?=post.link ?>"><?=post.title ?></a></h2>
+    <div class="meta"><?=os.date( '%a, %d %B, %Y', post.time ) ?></div>
+</div>
+<? end ?>
