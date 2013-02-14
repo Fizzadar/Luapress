@@ -17,3 +17,7 @@ Luapress is *yet another* static blog generator, written in Lua.
 
 + Add "all" to the end of the shell command to re-build all pages
 + The inc/ directory will be copied to build/inc/. Put poss content & template images/css here
+
+**To-Do:**
+
++ RSS Generation

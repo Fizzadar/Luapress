@@ -179,8 +179,8 @@ for k, post in pairs( posts ) do
     output = output .. template:process( templates.post )
     count = count + 1
 
-    --if we have n posts, create current index, reset
-    if count == config.posts_per_page then
+    --if we have n posts or are on last post, create current index, reset
+    if count == config.posts_per_page or k == #posts then
         --pick index file, open
         local f, err
         if index == 1 then
