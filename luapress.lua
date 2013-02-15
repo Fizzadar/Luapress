@@ -174,6 +174,7 @@ for k, page in pairs( pages ) do
         f:close()
     end
 end
+template:set( 'page', false )
 
 
 
