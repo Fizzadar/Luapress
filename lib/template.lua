@@ -32,9 +32,9 @@ function template:process( code )
     --replace <?=vars?>
     code = code:gsub( '<%?=([,/_\'%[%]%%%:%.%a%s%(%)]+)%s%?>', ']] .. self:toString( %1 ) .. [[' )
     --replace <? to close output, start raw lua
-    code = code:gsub( '<%?', ']] ' )
+    code = code:gsub( '<%?%s', ']] ' )
     --replace ?> to stop lua and start output (in table)
-    code = code:gsub( '%?>', ' output = output .. [[' )
+    code = code:gsub( '%s%?>', ' output = output .. [[' )
     --close final output and return concat of the table
     code = code .. ' \n]] return output'
 

@@ -23,5 +23,8 @@
     <div id="wrap">
         <div id="header">
             <h1><a href="<?=self:get( 'url' ) ?>"><?=self:get( 'title' ) ?></a></h1>
-            <ul><?=self:get( 'page_links' ) ?></ul>
+            <ul>
+                <?=self:get( 'page_links' ) ?>
+                <li><a href="<?=self:get( 'url' ) ?>/index.xml">RSS Feed</a></li>
+            </ul>
         </div><!--end header-->

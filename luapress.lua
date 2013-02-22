@@ -42,6 +42,26 @@ for file in lfs.dir( 'templates/' .. config.template .. '/' ) do
         templates[file:sub( 0, -7 )] = s
     end
 end
+--rss template
+templates.rss = [[
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+<channel>
+<title><?=self:get( 'title' ) ?></title>
+<link><?=self:get( 'url' ) ?></link>
+
+<? for k, post in pairs( self:get( 'posts' ) ) do ?>
+    <item>
+    <title><?=post.title ?></title>
+    <description><?=post.excerpt ?></description>
+    <link><?=self:get( 'url' ) ?>/posts/<?=post.link ?></link>
+    <guid><?=self:get( 'url' ) ?>/posts/<?=post.link ?></guid>
+    </item>
+<? end ?>
+
+</channel>
+</rss>
+]]
 
 --get posts
 for file in lfs.dir( 'posts/' ) do
@@ -67,7 +87,12 @@ for file in lfs.dir( 'posts/' ) do
         if not s then error( err ) end
 
         --string => markdown
-        post.content = markdown( s )
+        local start, finish = s:find( '--MORE--' )
+        if start then
+            post.excerpt = markdown( s:sub( 0, start - 1 ) )
+        end
+
+        post.content = markdown( s:gsub( '--MORE--', '' ) )
 
         --insert to posts
         table.insert( posts, post )
@@ -206,6 +231,7 @@ for k, post in pairs( posts ) do
         if index > 1 then
             if index == 2 then template:set( 'previous_page', 'index.html' ) else template:set( 'previous_page', 'index' .. index - 1 .. '.html' ) end
         else
+            --we are page 1!
             template:set( 'previous_page', false )
         end
         --work out next page
@@ -228,7 +254,22 @@ for k, post in pairs( posts ) do
     end
 end
 
-
+--build rss of last 10 posts
+local rssposts = {}
+for k, post in pairs( posts ) do
+    if k <= 10 then
+        if post.excerpt then post.excerpt = post.excerpt:gsub( '<[aA-zZ%s]+/?>', '' ):gsub( '</[aA-zZ%s]+>', '' ):gsub( '\n', '' ) end
+        table.insert( rssposts, post )
+    else
+        break
+    end
+end
+template:set( 'posts', rssposts )
+local rss = template:process( templates.rss )
+local f, err = io.open( 'build/index.xml', 'w' )
+if not f then error( err ) end
+local result, err = f:write( rss )
+if not result then error( err ) end
 
 --finally, copy over inc to build inc
 function copy_dir( dir, dest )

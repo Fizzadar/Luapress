@@ -19,9 +19,4 @@ Luapress is *yet another* static blog generator, written in Lua. This blog is it
 **Options & Notes:**
 
 + Add "all" to the end of the shell command to re-build all pages
-+ The inc/ directory will be copied to build/inc/, and your template inc to build/inc/template/
-
-**To-Do:**
-
-+ RSS Generation
-+ Excerpt for index pages?
++ The inc/ directory will be copied to build/inc/, and your template inc to build/inc/template
