@@ -1,3 +1,8 @@
+--testing:
+if ngx then
+    return require( 'lib/nginx' )()
+end
+
 --[[
     1. get data
         1.1 get posts
@@ -13,6 +18,7 @@ local require, print, error, table = require, print, error, table
 
 --config & fix missing bits
 local config = require( 'config' )
+config.url = arg[2] or config.url
 
 --modules
 local lfs = require( 'lfs' )
