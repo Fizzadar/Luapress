@@ -16,6 +16,7 @@ local require, print, error, table = require, print, error, table
 --config & fix missing bits
 local config = require( 'config' )
 config.url = arg[2] or config.url
+config.description = config.description or 'A blog'
 
 --modules
 local lfs = require( 'lfs' )
@@ -49,20 +50,19 @@ end
 templates.rss = [[
 <?xml version="1.0" encoding="utf-8"?>
 <rss version="2.0">
-<channel>
-<title><?=self:get( 'title' ) ?></title>
-<link><?=self:get( 'url' ) ?></link>
-
+    <channel>
+        <description>]] .. config.description .. [[</description>
+        <title><?=self:get( 'title' ) ?></title>
+        <link><?=self:get( 'url' ) ?></link>
 <? for k, post in pairs( self:get( 'posts' ) ) do ?>
-    <item>
-    <title><?=post.title ?></title>
-    <description><?=post.excerpt ?></description>
-    <link><?=self:get( 'url' ) ?>/posts/<?=post.link ?></link>
-    <guid><?=self:get( 'url' ) ?>/posts/<?=post.link ?></guid>
-    </item>
+        <item>
+            <title><?=post.title ?></title>
+            <description><?=post.excerpt ?></description>
+            <link><?=self:get( 'url' ) ?>/posts/<?=post.link ?></link>
+            <guid><?=self:get( 'url' ) ?>/posts/<?=post.link ?></guid>
+        </item>
 <? end ?>
-
-</channel>
+    </channel>
 </rss>
 ]]
 
@@ -101,6 +101,8 @@ for file in lfs.dir( 'posts/' ) do
         table.insert( posts, post )
     end
 end
+--sort posts by time
+table.sort( posts, function( a, b ) return a.time > b.time end )
 
 --get pages
 for file in lfs.dir( 'pages/' ) do
