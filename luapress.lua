@@ -1,7 +1,4 @@
---testing:
-if ngx then
-    return require( 'lib/nginx' )()
-end
+#!/usr/bin/env lua
 
 --[[
     1. get data
