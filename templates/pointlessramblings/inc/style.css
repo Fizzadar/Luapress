@@ -1,0 +1,159 @@
+*::selection {
+    color: #FFF;
+    background: rgb( 106, 68, 161 );
+}
+
+body {
+    background: #F9F9F9;
+    margin: 0;
+    font-family: 'Pontano Sans', Arial;
+    font-size: 16px;
+    line-height: 24px;
+    color: #444;
+}
+
+strong {
+    font-family: Helvetica, Arial;
+    letter-spacing: 1px;
+}
+
+img {
+    border: none;
+}
+
+a {
+    color: rgb( 106, 68, 161 );
+    text-decoration: none;
+}
+a:hover {
+    color: #1A1B1B;
+    text-decoration: underline;
+}
+
+pre {
+    background: #FFF;
+    padding: 10px;
+    margin-left: -10px;
+    border: 1px solid #D7D7D7;
+    overflow: auto;
+    width: 650px;
+}
+
+h1, h2, h3 {
+    font-family: 'Trocchi', Arial;
+    font-weight: normal;
+    font-size: 28px;
+    margin: 40px 0 0 0;
+}
+h3 {
+    font-size: 18px;
+}
+    h1 a, h3 a {
+        color: #1A1B1b;
+        border-bottom: 1px dashed #666;
+    }
+    h1 a:hover, h3 a:hover {
+        color: rgb( 106, 68, 161 );
+        text-decoration: none;
+    }
+
+.left {
+    float: left;
+}
+.right {
+    float: right;
+}
+
+div.wrap {
+    margin: 0 auto;
+    width: 1070px;
+}
+    div.wrap h2.title {
+        font-family: 'Trocchi', Arial;
+        font-weight: normal;
+        font-size: 48px;
+        text-align: left;
+        float: left;
+        margin: 75px 0 0 0;
+        width: 260px;
+        line-height: 50px;
+    }
+        div.wrap h2.title a {
+            display: block;
+            color: #fff;
+            width: 250px;
+            text-decoration: none;
+            padding: 180px 50px 50px 50px;
+            background: rgb( 106, 68, 161 ) url( keepcalm.png ) 50px 50px no-repeat;
+            border: 5px solid rgb( 106, 68, 161 );
+        }
+        div.wrap h2.title a:hover {
+            color: rgb( 106, 68, 161 );
+            background: #fff  url( keepcalm_hover.png ) 50px 50px no-repeat;
+        }
+
+    div.wrap div#content {
+        float: right;
+        width: 680px;
+        margin-top: 75px;
+        min-height: 500px;
+    }
+    div.wrap div#sidebar {
+        float: left;
+        width: 260px;
+        padding: 20px 50px;
+    }
+        div.wrap div#sidebar img.subscribe {
+            float: left;
+            padding-right: 5px;
+            margin-top: 3px;
+            width: 16px;
+            height: 16px;
+        }
+
+div.post {
+    margin-bottom: 10px;
+    float: left;
+    clear: both;
+}
+    div.post div.meta {
+        margin-top: 9px;
+    }
+
+ul#nav {
+    float: left;
+    width: 100%;
+    padding: 5px 0 20px 0;
+    margin: 0 0 -40px 0;
+    font-family: 'Trocchi', Arial;
+}
+    ul#nav li {
+        list-style: none;
+        float: left;
+        font-size: 20px;
+        margin-right: 10px;
+        opacity: 0.5;
+    }
+    ul#nav li.active {
+        opacity: 1;
+    }
+        ul#nav li.active a {
+            text-decoration: none;
+        }
+
+div.biglinks {
+    float: left;
+    width: 100%;
+    margin-bottom: 50px;
+}
+    div.biglinks a {
+        padding: 5px;
+        background: rgb( 106, 68, 161 );
+        border: 5px solid rgb( 106, 68, 161 );
+        color: #FFF;
+    }
+    div.biglinks a:hover {
+        background: #FFF;
+        color: #000;
+        text-decoration: none;
+    }
