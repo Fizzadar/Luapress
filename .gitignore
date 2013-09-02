@@ -1,3 +1,6 @@
+#normal
+.DS_Store
+
 #pre-build
 pages/*.md
 posts/*.md
