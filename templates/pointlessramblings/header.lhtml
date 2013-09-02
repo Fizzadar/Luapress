@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!--meta-->
+    <title><?=self:get( 'title' ) ?></title>
+    <meta charset="UTF-8" />
+
+    <!--favicon-->
+    <link rel="icon" href="<?=self:get( 'url' ) ?>/inc/template/favicon.png" />
+
+    <!--style-->
+    <link rel="stylesheet" href="<?=self:get( 'url' ) ?>/inc/template/style.css" />
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Pontano+Sans|Trocchi" />
+
+    <!--scripts-->
+</head>
+<body>
+
+    <div class="wrap">
+        <h2 class="title"><a href="<?=self:get( 'url' ) ?>"><?=self:get( 'title' ) ?></a></h2>
+
+        <div id="content">
+            <ul id="nav">
+                <? if self:get( 'single' ) or self:get( 'page' ) then ?>
+                    <li><a href="<?=self:get( 'url' ) ?>">Front</a></li>
+                <? else ?>
+                    <li class="active"><a href="<?=self:get( 'url' ) ?>">Front</a></li>
+                <? end ?>
+                <?=self:get( 'page_links' ) ?>
+            </ul>

@@ -1,0 +1,14 @@
+<div class="post">
+    <h2><? if self:get( 'single' ) then ?><?=self:get( 'post' ).title ?><? else ?>
+        <a href="<?=self:get( 'url' ) ?>/posts/<?=self:get( 'post' ).link ?>"><?=self:get( 'post' ).title ?></a>
+    <? end ?></h2>
+    <div class="meta"><?=os.date( '%d %B %Y', self:get( 'post' ).time ) ?></div>
+    <div class="content">
+        <? if self:get( 'post' ).excerpt and not self:get( 'single' ) then ?>
+            <?=self:get( 'post' ).excerpt ?>
+            <a href="<?=self:get( 'url' ) ?>/posts/<?=self:get( 'post' ).link ?>">Read more &rarr;</a>
+        <? else ?>
+            <?=self:get( 'post' ).content ?>
+        <? end ?>
+    </div>
+</div>

@@ -20,19 +20,5 @@ Luapress is *yet another* static blog generator, written in Lua. This blog is it
 
 + Add "all" to the end of the shell command to re-build all pages
 + The inc/ directory will be copied to build/inc/, and your template inc to build/inc/template
-
-## License
-
-               DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE 
-                       Version 2, December 2004 
-    
-    Copyright (C) 2013 Nick Barrett <nick@oxygem.com>
-    
-    Everyone is permitted to copy and distribute verbatim or modified 
-    copies of this license document, and changing it is allowed as long 
-    as the name is changed. 
-    
-               DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE 
-      TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION 
-    
-     0. You just DO WHAT THE FUCK YOU WANT TO.
++ Set $key=value in posts for custom data (use `<?=self:get( 'post' ).key ?>` in template)
++ Set $time=time_in_epoch or $data=day/month/year to customize post time (default file update time)
