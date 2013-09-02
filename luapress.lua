@@ -67,6 +67,7 @@ templates.rss = [[
 ]]
 
 --get posts
+print( '[Luapress]: Posts' )
 for file in lfs.dir( 'posts/' ) do
     if file:sub( -3 ) == '.md' then
         --work out title
@@ -89,22 +90,37 @@ for file in lfs.dir( 'posts/' ) do
         local s, err = f:read( '*a' )
         if not s then error( err ) end
 
-        --string => markdown
+        --get $key=value's
+        for k, v, c, d in s:gmatch( '%$([%w]+)=([%w%p ]+)' ) do
+            post[k] = v
+            s = s:gsub( '%$([%w]+)=([%w%p ]+)', '' )
+        end
+
+        --excerpt
         local start, finish = s:find( '--MORE--' )
         if start then
             post.excerpt = markdown( s:sub( 0, start - 1 ) )
         end
-
         post.content = markdown( s:gsub( '--MORE--', '' ) )
+
+        --date set?
+        if post.date then
+            local a, b, d, m, y = post.date:find( '(%d+)\/(%d+)\/(%d+)' )
+            post.time = os.time( { day = d, month = m, year = y } )
+        end
 
         --insert to posts
         table.insert( posts, post )
+
+        --log
+        print( '\tPost added: ' .. post.title )
     end
 end
 --sort posts by time
-table.sort( posts, function( a, b ) return a.time > b.time end )
+table.sort( posts, function( a, b ) return tonumber( a.time ) > tonumber( b.time ) end )
 
 --get pages
+print( '[Luapress]: Pages' )
 for file in lfs.dir( 'pages/' ) do
     if file:sub( -3 ) == '.md' then
         --work out title
@@ -130,6 +146,9 @@ for file in lfs.dir( 'pages/' ) do
 
         --insert to pages
         table.insert( pages, page )
+
+        --log
+        print( '\tPage added: ' .. page.title )
     end
 end
 --archive page/index
@@ -162,6 +181,7 @@ template:set( 'page_links', luapress_page_links() )
 
 
 --begin generation of post pages
+print( '[Luapress]: Building posts' )
 template:set( 'single', true )
 for k, post in pairs( posts ) do
     --is there a file already there?!
@@ -184,6 +204,7 @@ end
 template:set( 'single', false )
 
 --begin generation of page pages
+print( '[Luapress]: Building pages' )
 for k, page in pairs( pages ) do
     --is there a file already there?!
     local f = io.open( 'build/pages/' .. page.link, 'r' )
@@ -210,6 +231,7 @@ template:set( 'page', false )
 
 --reset page_links for indexes
 template:set( 'page_links', luapress_page_links() )
+print( '[Luapress]: Building indexes' )
 
 --iterate to generate indexes
 local index = 1
@@ -260,6 +282,7 @@ for k, post in pairs( posts ) do
 end
 
 --build rss of last 10 posts
+print( '[Luapress]: Building rss' )
 local rssposts = {}
 for k, post in pairs( posts ) do
     if k <= 10 then
@@ -277,6 +300,7 @@ local result, err = f:write( rss )
 if not result then error( err ) end
 
 --finally, copy over inc to build inc
+print( '[Luapress]: Copy inc' )
 function copy_dir( dir, dest )
     for file in lfs.dir( dir ) do
         if file ~= '.' and file ~= '..' then
@@ -314,3 +338,5 @@ function copy_dir( dir, dest )
 end
 copy_dir( 'inc/', 'build/inc/' )
 copy_dir( 'templates/' .. config.template .. '/inc/', 'build/inc/template/' )
+
+print( '[Luapress]: Complete! Upload ./build to your website' )
