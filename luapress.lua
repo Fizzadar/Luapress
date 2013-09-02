@@ -72,13 +72,13 @@ for file in lfs.dir( 'posts/' ) do
     if file:sub( -3 ) == '.md' then
         --work out title
         local title = file:sub( 0, -4 )
-        local link = title:gsub( ' ', '_' ):gsub( '[^_aA-zZ0-9]', '' ) .. '.html'
+        local link = title:gsub( ' ', '_' ):gsub( '[^_aA-zZ0-9]', '' )
         file = 'posts/' .. file
 
         --get basic attributes
         local attributes = lfs.attributes( file )
         local post = {
-            link = link,
+            link = link .. '/',
             title = title,
             content = '',
             time = attributes.modification
@@ -125,7 +125,7 @@ for file in lfs.dir( 'pages/' ) do
     if file:sub( -3 ) == '.md' then
         --work out title
         local title = file:sub( 0, -4 )
-        local link = title:gsub( ' ', '_' ):gsub( '[^_aA-zZ0-9]', '' ) .. '.html'
+        local link = title:gsub( ' ', '_' ):gsub( '[^_aA-zZ0-9]', '' )
         file = 'pages/' .. file
 
         --attributes
@@ -153,7 +153,7 @@ for file in lfs.dir( 'pages/' ) do
 end
 --archive page/index
 template:set( 'posts', posts )
-table.insert( pages, { link = 'Archive.html', title = 'Archive', content = template:process( templates.archive ) } )
+table.insert( pages, { link = 'archive', title = 'Archive', content = template:process( templates.archive ) } )
 
 
 
@@ -170,9 +170,9 @@ function luapress_page_links( active )
     local output = ''
     for k, page in pairs( pages ) do
         if page.link == active then
-            output = output .. '<li class="active"><a href="' .. config.url .. '/pages/' .. active .. '">' .. page.title .. '</a></li>\n'
+            output = output .. '<li class="active"><a href="' .. config.url .. '/pages/' .. active .. '/">' .. page.title .. '</a></li>\n'
         else
-            output = output .. '<li><a href="' .. config.url .. '/pages/' .. page.link .. '">' .. page.title .. '</a></li>\n'
+            output = output .. '<li><a href="' .. config.url .. '/pages/' .. page.link .. '/">' .. page.title .. '</a></li>\n'
         end
     end
     return output
@@ -185,7 +185,7 @@ print( '[Luapress]: Building posts' )
 template:set( 'single', true )
 for k, post in pairs( posts ) do
     --is there a file already there?!
-    local f = io.open( 'build/posts/' .. post.link, 'r' )
+    local f = io.open( 'build/posts/' .. post.link .. '/index.html', 'r' )
 
     if not f or ( arg[1] and arg[1] == 'all' ) then
         --set post
@@ -193,7 +193,8 @@ for k, post in pairs( posts ) do
 
         local output = template:process( templates.header ) .. template:process( templates.post ) .. template:process( templates.footer )
 
-        f, err = io.open( 'build/posts/' .. post.link, 'w' )
+		lfs.mkdir( 'build/posts/' .. post.link )
+        f, err = io.open( 'build/posts/' .. post.link .. '/index.html', 'w' )
         if not f then error( err ) end
         local result, err = f:write( output )
         if not result then error( err ) end
@@ -217,7 +218,8 @@ for k, page in pairs( pages ) do
 
         local output = template:process( templates.header ) .. template:process( templates.page ) .. template:process( templates.footer )
 
-        f, err = io.open( 'build/pages/' .. page.link, 'w' )
+		lfs.mkdir( 'build/pages/' .. page.link )
+        f, err = io.open( 'build/pages/' .. page.link .. '/index.html', 'w' )
         if not f then error( err ) end
         local result, err = f:write( output )
         if not result then error( err ) end
