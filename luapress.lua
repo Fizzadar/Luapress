@@ -72,13 +72,13 @@ for file in lfs.dir( 'posts/' ) do
     if file:sub( -3 ) == '.md' then
         --work out title
         local title = file:sub( 0, -4 )
-        local link = title:gsub( ' ', '_' ):gsub( '[^_aA-zZ0-9]', '' ) .. '.html'
+        local link = title:gsub( ' ', '_' ):gsub( '[^_aA-zZ0-9]', '' )
         file = 'posts/' .. file
 
         --get basic attributes
         local attributes = lfs.attributes( file )
         local post = {
-            link = link,
+            link = link .. '/',
             title = title,
             content = '',
             time = attributes.modification
@@ -125,7 +125,7 @@ for file in lfs.dir( 'pages/' ) do
     if file:sub( -3 ) == '.md' then
         --work out title
         local title = file:sub( 0, -4 )
-        local link = title:gsub( ' ', '_' ):gsub( '[^_aA-zZ0-9]', '' ) .. '.html'
+        local link = title:gsub( ' ', '_' ):gsub( '[^_aA-zZ0-9]', '' )
         file = 'pages/' .. file
 
         --attributes
@@ -153,15 +153,16 @@ for file in lfs.dir( 'pages/' ) do
 end
 --archive page/index
 template:set( 'posts', posts )
-table.insert( pages, { link = 'Archive.html', title = 'Archive', content = template:process( templates.archive ) } )
+table.insert( pages, { link = 'archive', title = 'Archive', content = template:process( templates.archive ) } )
 
 
 
 --make sure we have our directories
-if not io.open( 'build/posts' ) and not lfs.mkdir( 'build/posts' ) then error( 'Cant make build/posts' ) end
-if not io.open( 'build/pages' ) and not lfs.mkdir( 'build/pages' ) then error( 'Cant make build/pages' ) end
-if not io.open( 'build/inc' ) and not lfs.mkdir( 'build/inc' ) then error( 'Cant make build/inc' ) end
-if not io.open( 'build/inc/template' ) and not lfs.mkdir( 'build/inc/template' ) then error( 'Cant make build/inc/template' ) end
+if not lfs.mkdir( config.dir ) and not lfs.dir( config.dir ) then error( 'Cant make the build directory' ) end
+if not lfs.mkdir( config.dir .. '/posts' ) and not lfs.dir( config.dir .. '/posts' ) then error( 'Cant make the posts directory' ) end
+if not lfs.mkdir( config.dir .. '/pages' ) and not lfs.dir( config.dir .. '/pages' ) then error( 'Cant make the pages directory' ) end
+if not lfs.mkdir( config.dir .. '/inc' ) and not lfs.dir( config.dir .. '/inc' ) then error( 'Cant make the "inc" directory' ) end
+if not lfs.mkdir( config.dir .. '/inc/template' ) and not lfs.dir( config.dir .. '/inc/template' ) then error( 'Cant make the template\'s "inc" directory' ) end
 
 
 
@@ -170,9 +171,9 @@ function luapress_page_links( active )
     local output = ''
     for k, page in pairs( pages ) do
         if page.link == active then
-            output = output .. '<li class="active"><a href="' .. config.url .. '/pages/' .. active .. '">' .. page.title .. '</a></li>\n'
+            output = output .. '<li class="active"><a href="' .. config.url .. '/pages/' .. active .. '/">' .. page.title .. '</a></li>\n'
         else
-            output = output .. '<li><a href="' .. config.url .. '/pages/' .. page.link .. '">' .. page.title .. '</a></li>\n'
+            output = output .. '<li><a href="' .. config.url .. '/pages/' .. page.link .. '/">' .. page.title .. '</a></li>\n'
         end
     end
     return output
@@ -185,7 +186,7 @@ print( '[Luapress]: Building posts' )
 template:set( 'single', true )
 for k, post in pairs( posts ) do
     --is there a file already there?!
-    local f = io.open( 'build/posts/' .. post.link, 'r' )
+    local f = io.open( config.dir .. '/posts/' .. post.link .. '/index.html', 'r' )
 
     if not f or ( arg[1] and arg[1] == 'all' ) then
         --set post
@@ -193,7 +194,8 @@ for k, post in pairs( posts ) do
 
         local output = template:process( templates.header ) .. template:process( templates.post ) .. template:process( templates.footer )
 
-        f, err = io.open( 'build/posts/' .. post.link, 'w' )
+		lfs.mkdir( config.dir .. '/posts/' .. post.link )
+        f, err = io.open( config.dir .. '/posts/' .. post.link .. '/index.html', 'w' )
         if not f then error( err ) end
         local result, err = f:write( output )
         if not result then error( err ) end
@@ -207,7 +209,7 @@ template:set( 'single', false )
 print( '[Luapress]: Building pages' )
 for k, page in pairs( pages ) do
     --is there a file already there?!
-    local f = io.open( 'build/pages/' .. page.link, 'r' )
+    local f = io.open( config.dir .. '/pages/' .. page.link, 'r' )
 
     if not f or ( arg[1] and arg[1] == 'all' ) then
         --we're a page, so change up page_links
@@ -217,7 +219,8 @@ for k, page in pairs( pages ) do
 
         local output = template:process( templates.header ) .. template:process( templates.page ) .. template:process( templates.footer )
 
-        f, err = io.open( 'build/pages/' .. page.link, 'w' )
+		lfs.mkdir( config.dir .. '/pages/' .. page.link )
+        f, err = io.open( config.dir .. '/pages/' .. page.link .. '/index.html', 'w' )
         if not f then error( err ) end
         local result, err = f:write( output )
         if not result then error( err ) end
@@ -248,9 +251,9 @@ for k, post in pairs( posts ) do
         --pick index file, open
         local f, err
         if index == 1 then
-            f, err = io.open( 'build/index.html', 'w' )
+            f, err = io.open( config.dir .. '/index.html', 'w' )
         else
-            f, err = io.open( 'build/index' .. index .. '.html', 'w' )
+            f, err = io.open( config.dir .. '/index' .. index .. '.html', 'w' )
         end
         if not f then error( err ) end
 
@@ -294,7 +297,7 @@ for k, post in pairs( posts ) do
 end
 template:set( 'posts', rssposts )
 local rss = template:process( templates.rss )
-local f, err = io.open( 'build/index.xml', 'w' )
+local f, err = io.open( config.dir .. '/index.xml', 'w' )
 if not f then error( err ) end
 local result, err = f:write( rss )
 if not result then error( err ) end
@@ -336,7 +339,7 @@ function copy_dir( dir, dest )
         end
     end
 end
-copy_dir( 'inc/', 'build/inc/' )
-copy_dir( 'templates/' .. config.template .. '/inc/', 'build/inc/template/' )
+copy_dir( 'inc/', config.dir .. '/inc/' )
+copy_dir( 'templates/' .. config.template .. '/inc/', config.dir .. './inc/template/' )
 
-print( '[Luapress]: Complete! Upload ./build to your website' )
+print( '[Luapress]: Complete!' )
