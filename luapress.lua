@@ -314,7 +314,7 @@ print( '[Luapress]: Building rss' )
 local rssposts = {}
 for k, post in pairs( posts ) do
     if k <= 10 then
-        if post.excerpt then post.excerpt = post.excerpt:gsub( '<[aA-zZ%s]+/?>', '' ):gsub( '</[aA-zZ%s]+>', '' ):gsub( '\n', '' ) end
+        if post.excerpt then post.excerpt = post.excerpt:gsub( '<[^>]+/?>', ' ' ):gsub( '</[^>]+>', ' ' ):gsub( '\n', '' ) end
         table.insert( rssposts, post )
     else
         break
