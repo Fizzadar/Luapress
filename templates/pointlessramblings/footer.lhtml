@@ -10,7 +10,7 @@
 
             <br />
             <small>
-                powered by <a href="<?=self:get( 'url' ) ?>/pages/Luapress.html">luapress &rarr;</a>
+                powered by <a href="http://pointlessramblings.com/pages/Luapress">Luapress &rarr;</a>
             </small>
         </div><!--end sidebar-->
 
