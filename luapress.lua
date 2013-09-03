@@ -72,7 +72,8 @@ for file in lfs.dir( 'posts/' ) do
     if file:sub( -3 ) == '.md' then
         --work out title
         local title = file:sub( 0, -4 )
-        local link = title:gsub( ' ', '_' ):gsub( '[^_aA-zZ0-9]', '' ) .. '.html'
+        local link = title:gsub( ' ', '_' ):gsub( '[^_aA-zZ0-9]', '' )
+        if not config.link_dirs then link = link .. '.html' end
         file = 'posts/' .. file
 
         --get basic attributes
@@ -125,7 +126,8 @@ for file in lfs.dir( 'pages/' ) do
     if file:sub( -3 ) == '.md' then
         --work out title
         local title = file:sub( 0, -4 )
-        local link = title:gsub( ' ', '_' ):gsub( '[^_aA-zZ0-9]', '' ) .. '.html'
+        local link = title:gsub( ' ', '_' ):gsub( '[^_aA-zZ0-9]', '' )
+        if not config.link_dirs then link = link .. '.html' end
         file = 'pages/' .. file
 
         --attributes
@@ -153,7 +155,9 @@ for file in lfs.dir( 'pages/' ) do
 end
 --archive page/index
 template:set( 'posts', posts )
-table.insert( pages, { link = 'Archive.html', title = 'Archive', content = template:process( templates.archive ) } )
+local link = 'Archive'
+if not config.link_dirs then link = link .. '.html' end
+table.insert( pages, { link = link, title = 'Archive', content = template:process( templates.archive ) } )
 
 
 
@@ -185,7 +189,7 @@ print( '[Luapress]: Building posts' )
 template:set( 'single', true )
 for k, post in pairs( posts ) do
     --is there a file already there?!
-    local f = io.open( 'build/posts/' .. post.link, 'r' )
+    local f, err = io.open( 'build/posts/' .. post.link, 'r' )
 
     if not f or ( arg[1] and arg[1] == 'all' ) then
         --set post
@@ -193,7 +197,13 @@ for k, post in pairs( posts ) do
 
         local output = template:process( templates.header ) .. template:process( templates.post ) .. template:process( templates.footer )
 
-        f, err = io.open( 'build/posts/' .. post.link, 'w' )
+        if config.link_dirs then
+            lfs.mkdir( 'build/posts/' .. post.link )
+            f, err = io.open( 'build/posts/' .. post.link .. '/index.html', 'w' )
+        else
+            f, err = io.open( 'build/posts/' .. post.link, 'w' )
+        end
+
         if not f then error( err ) end
         local result, err = f:write( output )
         if not result then error( err ) end
@@ -207,7 +217,7 @@ template:set( 'single', false )
 print( '[Luapress]: Building pages' )
 for k, page in pairs( pages ) do
     --is there a file already there?!
-    local f = io.open( 'build/pages/' .. page.link, 'r' )
+    local f, err = io.open( 'build/pages/' .. page.link, 'r' )
 
     if not f or ( arg[1] and arg[1] == 'all' ) then
         --we're a page, so change up page_links
@@ -217,7 +227,13 @@ for k, page in pairs( pages ) do
 
         local output = template:process( templates.header ) .. template:process( templates.page ) .. template:process( templates.footer )
 
-        f, err = io.open( 'build/pages/' .. page.link, 'w' )
+        if config.link_dirs then
+            lfs.mkdir( 'build/pages/' .. page.link )
+            f, err = io.open( 'build/pages/' .. page.link .. '/index.html', 'w' )
+        else
+            f, err = io.open( 'build/pages/' .. page.link, 'w' )
+        end
+
         if not f then error( err ) end
         local result, err = f:write( output )
         if not result then error( err ) end
