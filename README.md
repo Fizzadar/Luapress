@@ -11,14 +11,15 @@ Luapress is *yet another* static blog generator, written in Lua. This blog is it
 
 **How-To:**
 
-+ Edit config.lua
++ Edit rename `config.example.lua` => `config.lua`
 + Drop markdown (.md) files in posts/ and pages/
-+ Run "lua luapress.lua" from shell
++ Run `lua luapress.lua` from shell
 + Copy contents of build/ to web
 
 **Options & Notes:**
 
 + Add "all" to the end of the shell command to re-build all pages
-+ The inc/ directory will be copied to build/inc/, and your template inc to build/inc/template
-+ Set $key=value in posts for custom data (use `<?=self:get( 'post' ).key ?>` in template)
-+ Set $time=time_in_epoch or $data=day/month/year to customize post time (default file update time)
++ Set `config.link_dirs = true` in `config.lua` to have posts & pages generated at `/name/index.html` rather than `/name.html`
++ The `inc/` directory will be copied to `build/inc/`, and your template inc to `build/inc/template`
++ Set `$key=value` in posts for custom data (use `<?=self:get( 'post' ).key ?>` in template)
++ Set `$time=time_in_epoch` or `$date=day/month/year` to customize post time (default file update time)
