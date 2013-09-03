@@ -158,10 +158,10 @@ table.insert( pages, { link = 'Archive.html', title = 'Archive', content = templ
 
 
 --make sure we have our directories
-if not io.open( 'build/posts' ) and not lfs.mkdir( 'build/posts' ) then error( 'Cant make build/posts' ) end
-if not io.open( 'build/pages' ) and not lfs.mkdir( 'build/pages' ) then error( 'Cant make build/pages' ) end
-if not io.open( 'build/inc' ) and not lfs.mkdir( 'build/inc' ) then error( 'Cant make build/inc' ) end
-if not io.open( 'build/inc/template' ) and not lfs.mkdir( 'build/inc/template' ) then error( 'Cant make build/inc/template' ) end
+if not lfs.attributes( 'build/posts' ) and not lfs.mkdir( 'build/posts' ) then error( 'Cant make build/posts' ) end
+if not lfs.attributes( 'build/pages' ) and not lfs.mkdir( 'build/pages' ) then error( 'Cant make build/pages' ) end
+if not lfs.attributes( 'build/inc' ) and not lfs.mkdir( 'build/inc' ) then error( 'Cant make build/inc' ) end
+if not lfs.attributes( 'build/inc/template' ) and not lfs.mkdir( 'build/inc/template' ) then error( 'Cant make build/inc/template' ) end
 
 
 
