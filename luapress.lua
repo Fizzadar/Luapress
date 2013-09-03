@@ -143,11 +143,21 @@ for file in lfs.dir( 'pages/' ) do
         local s, err = f:read( '*a' )
         if not s then error( err ) end
 
+        --get $key=value's
+        for k, v, c, d in s:gmatch( '%$([%w]+)=([%w%p ]+)' ) do
+            page[k] = v
+            s = s:gsub( '%$([%w]+)=([%w%p ]+)', '' )
+        end
+
         --string => markdown
         page.content = markdown( s )
 
         --insert to pages
-        table.insert( pages, page )
+        if page.order then
+            table.insert( pages, page.order, page )
+        else
+            table.insert( pages, page )
+        end
 
         --log
         print( '\tPage added: ' .. page.title )
