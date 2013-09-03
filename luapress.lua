@@ -158,11 +158,11 @@ table.insert( pages, { link = 'archive', title = 'Archive', content = template:p
 
 
 --make sure we have our directories
-if not io.open( config.dir ) and not lfs.mkdir( config.dir ) then error( 'Cant make the build directory' ) end
-if not io.open( config.dir .. '/posts' ) and not lfs.mkdir( config.dir .. '/posts' ) then error( 'Cant make the posts directory' ) end
-if not io.open( config.dir .. '/pages' ) and not lfs.mkdir( config.dir .. '/pages' ) then error( 'Cant make the pages directory' ) end
-if not io.open( config.dir .. '/inc' ) and not lfs.mkdir( config.dir .. '/inc' ) then error( 'Cant make the "inc" directory' ) end
-if not io.open( config.dir .. '/inc/template' ) and not lfs.mkdir( config.dir .. '/inc/template' ) then error( 'Cant make the template\'s "inc" directory' ) end
+if not os.rename( config.dir, config.dir ) and not lfs.mkdir( config.dir ) then error( 'Cant make the build directory' ) end
+if not os.rename( config.dir .. '/posts', config.dir .. '/posts' ) and not lfs.mkdir( config.dir .. '/posts' ) then error( 'Cant make the posts directory' ) end
+if not os.rename( config.dir .. '/pages', config.dir .. '/pages' ) and not lfs.mkdir( config.dir .. '/pages' ) then error( 'Cant make the pages directory' ) end
+if not os.rename( config.dir .. '/inc', config.dir .. '/inc' ) and not lfs.mkdir( config.dir .. '/inc' ) then error( 'Cant make the "inc" directory' ) end
+if not os.rename( config.dir .. '/inc/template', config.dir .. '/inc/template' ) and not lfs.mkdir( config.dir .. '/inc/template' ) then error( 'Cant make the template\'s "inc" directory' ) end
 
 
 
@@ -297,7 +297,7 @@ for k, post in pairs( posts ) do
 end
 template:set( 'posts', rssposts )
 local rss = template:process( templates.rss )
-local f, err = io.open( config.dir .. 'index.xml', 'w' )
+local f, err = io.open( config.dir .. '/index.xml', 'w' )
 if not f then error( err ) end
 local result, err = f:write( rss )
 if not result then error( err ) end
