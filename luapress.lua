@@ -183,10 +183,12 @@ if not lfs.attributes( 'build/inc/template' ) and not lfs.mkdir( 'build/inc/temp
 function luapress_page_links( active )
     local output = ''
     for k, page in pairs( pages ) do
-        if page.link == active then
-            output = output .. '<li class="active"><a href="' .. config.url .. '/pages/' .. active .. '">' .. page.title .. '</a></li>\n'
-        else
-            output = output .. '<li><a href="' .. config.url .. '/pages/' .. page.link .. '">' .. page.title .. '</a></li>\n'
+        if not page.hidden then
+            if page.link == active then
+                output = output .. '<li class="active"><a href="' .. config.url .. '/pages/' .. active .. '">' .. page.title .. '</a></li>\n'
+            else
+                output = output .. '<li><a href="' .. config.url .. '/pages/' .. page.link .. '">' .. page.title .. '</a></li>\n'
+            end
         end
     end
     return output
