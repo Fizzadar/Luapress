@@ -2,7 +2,7 @@
 <html>
 <head>
     <!--meta-->
-    <title><?=self:get( 'title' ) ?></title>
+    <title><? if self:get( 'single' ) then ?><?=self:get( 'post' ).title ?> - <? end ?><? if self:get( 'page' ) then ?><?=self:get( 'page' ).title ?> - <? end ?><?=self:get( 'title' ) ?></title>
     <meta charset="UTF-8" />
 
     <!--favicon-->
