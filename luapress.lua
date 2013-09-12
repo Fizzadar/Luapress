@@ -92,9 +92,9 @@ for file in lfs.dir( 'posts/' ) do
         if not s then error( err ) end
 
         --get $key=value's
-        for k, v, c, d in s:gmatch( '%$([%w]+)=([%w%p ]+)' ) do
+        for k, v, c, d in s:gmatch( '%$([%w]+)=(.-)\n' ) do
             post[k] = v
-            s = s:gsub( '%$([%w]+)=([%w%p ]+)', '' )
+            s = s:gsub( '%$[%w]+=[%w%p ]+', '' )
         end
 
         --excerpt
@@ -144,10 +144,13 @@ for file in lfs.dir( 'pages/' ) do
         if not s then error( err ) end
 
         --get $key=value's
-        for k, v, c, d in s:gmatch( '%$([%w]+)=([%w%p ]+)' ) do
+        for k, v, c, d in s:gmatch( '%$([%w]+)=(.-)\n' ) do
             page[k] = v
             s = s:gsub( '%$([%w]+)=([%w%p ]+)', '' )
         end
+
+        --set $=key's
+        s = s:gsub( '%$=url', config.url )
 
         --string => markdown
         page.content = markdown( s )
@@ -165,6 +168,7 @@ for file in lfs.dir( 'pages/' ) do
 end
 --archive page/index
 template:set( 'posts', posts )
+template:set( 'page', { title = Archive } )
 local link = 'Archive'
 if not config.link_dirs then link = link .. '.html' end
 table.insert( pages, { link = link, title = 'Archive', content = template:process( templates.archive ) } )
