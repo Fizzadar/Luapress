@@ -94,7 +94,7 @@ for file in lfs.dir( 'posts/' ) do
         --get $key=value's
         for k, v, c, d in s:gmatch( '%$([%w]+)=(.-)\n' ) do
             post[k] = v
-            s = s:gsub( '%$[%w]+=[%w%p ]+', '' )
+            s = s:gsub( '%$[%w]+=.-\n', '' )
         end
 
         --excerpt
@@ -146,7 +146,7 @@ for file in lfs.dir( 'pages/' ) do
         --get $key=value's
         for k, v, c, d in s:gmatch( '%$([%w]+)=(.-)\n' ) do
             page[k] = v
-            s = s:gsub( '%$([%w]+)=([%w%p ]+)', '' )
+            s = s:gsub( '%$[%w]+=.-\n', '' )
         end
 
         --set $=key's
