@@ -21,11 +21,12 @@ end
 
 --config & fix missing bits
 local config = require( 'config' )
+config.version = '1.0.0'
 config.url = arg[1] or config.url
 config.description = config.description or 'A blog'
 
 print( '#' )
-print( '# Luapress for: ' .. config.url )
+print( '# Luapress v' .. config.version .. ' for: ' .. config.url )
 print( '#' )
 
 --modules
