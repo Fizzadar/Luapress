@@ -13,10 +13,20 @@
 --local optimization
 local require, print, error, table = require, print, error, table
 
+--help?
+if arg[1] == 'help' then
+    print( './press.lua <optional url http://example.com>' )
+    return 0
+end
+
 --config & fix missing bits
 local config = require( 'config' )
-config.url = arg[2] or config.url
+config.url = arg[1] or config.url
 config.description = config.description or 'A blog'
+
+print( '#' )
+print( '# Luapress for: ' .. config.url )
+print( '#' )
 
 --modules
 local lfs = require( 'lfs' )
@@ -35,19 +45,28 @@ template:set( 'title', config.title )
 template:set( 'url', config.url )
 
 --get templates
+print( '[1] Loading templates' )
 for file in lfs.dir( 'templates/' .. config.template .. '/' ) do
     if file:sub( -5 ) == 'lhtml' then
-        local f, err = io.open( 'templates/' .. config.template .. '/' .. file, 'r' )
+        local tmpl_name = file:sub( 0, -7 )
+        file = 'templates/' .. config.template .. '/' .. file
+        local f, err = io.open( file, 'r' )
         if not f then error( err ) end
         local s, err = f:read( '*a' )
         if not s then error( err ) end
         f:close()
 
-        templates[file:sub( 0, -7 )] = s
+        templates[tmpl_name] = {
+            content = s,
+            time = lfs.attributes( file ).modification
+        }
+        print( '\t' .. tmpl_name )
     end
 end
 --rss template
-templates.rss = [[
+templates.rss = {
+    time = 0,
+    content = [[
 <?xml version="1.0" encoding="utf-8"?>
 <rss version="2.0">
     <channel>
@@ -64,10 +83,10 @@ templates.rss = [[
 <? end ?>
     </channel>
 </rss>
-]]
+]]}
 
 --get posts
-print( '[Luapress]: Posts' )
+print( '[2] Loading posts' )
 for file in lfs.dir( 'posts/' ) do
     if file:sub( -3 ) == '.md' then
         --work out title
@@ -77,12 +96,11 @@ for file in lfs.dir( 'posts/' ) do
         file = 'posts/' .. file
 
         --get basic attributes
-        local attributes = lfs.attributes( file )
         local post = {
             link = link,
             title = title,
             content = '',
-            time = attributes.modification
+            time = lfs.attributes( file ).modification
         }
 
         --now read the file
@@ -114,14 +132,14 @@ for file in lfs.dir( 'posts/' ) do
         table.insert( posts, post )
 
         --log
-        print( '\tPost added: ' .. post.title )
+        print( '\t' .. post.title )
     end
 end
 --sort posts by time
 table.sort( posts, function( a, b ) return tonumber( a.time ) > tonumber( b.time ) end )
 
 --get pages
-print( '[Luapress]: Pages' )
+print( '[3] Loading pages' )
 for file in lfs.dir( 'pages/' ) do
     if file:sub( -3 ) == '.md' then
         --work out title
@@ -134,7 +152,8 @@ for file in lfs.dir( 'pages/' ) do
         local page = {
             link = link,
             title = title,
-            content = ''
+            content = '',
+            time = lfs.attributes( file ).modification
         }
 
         --now read the file
@@ -163,7 +182,7 @@ for file in lfs.dir( 'pages/' ) do
         end
 
         --log
-        print( '\tPage added: ' .. page.title )
+        print( '\t' .. page.title )
     end
 end
 --archive page/index
@@ -171,8 +190,7 @@ template:set( 'posts', posts )
 template:set( 'page', { title = Archive } )
 local link = 'Archive'
 if not config.link_dirs then link = link .. '.html' end
-table.insert( pages, { link = link, title = 'Archive', content = template:process( templates.archive ) } )
-
+table.insert( pages, { link = link, title = 'Archive', time = os.time(), content = template:process( templates.archive.content ) } )
 
 
 --make sure we have our directories
@@ -201,60 +219,62 @@ template:set( 'page_links', luapress_page_links() )
 
 
 --begin generation of post pages
-print( '[Luapress]: Building posts' )
+print( '[4] Building new posts' )
 template:set( 'single', true )
 for k, post in pairs( posts ) do
-    --is there a file already there?!
-    local f, err = io.open( 'build/posts/' .. post.link, 'r' )
-
-    if not f or ( arg[1] and arg[1] == 'all' ) then
+    local dest_file
+    if config.link_dirs then
+        lfs.mkdir( 'build/posts/' .. post.link )
+        dest_file = 'build/posts/' .. post.link .. '/index.html'
+    else
+        dest_file = 'build/posts/' .. post.link
+    end
+    --check modification time on post & destination files
+    local attributes = lfs.attributes( dest_file )
+    if attributes and post.time > attributes.modification then
         --set post
         template:set( 'post', post )
 
-        local output = template:process( templates.header ) .. template:process( templates.post ) .. template:process( templates.footer )
+        local output = template:process( templates.header.content ) .. template:process( templates.post.content ) .. template:process( templates.footer.content )
 
-        if config.link_dirs then
-            lfs.mkdir( 'build/posts/' .. post.link )
-            f, err = io.open( 'build/posts/' .. post.link .. '/index.html', 'w' )
-        else
-            f, err = io.open( 'build/posts/' .. post.link, 'w' )
-        end
-
+        f, err = io.open( dest_file, 'w' )
         if not f then error( err ) end
         local result, err = f:write( output )
         if not result then error( err ) end
 
         f:close()
+        print( '\t' .. post.title )
     end
 end
 template:set( 'single', false )
 
 --begin generation of page pages
-print( '[Luapress]: Building pages' )
+print( '[5] Building new pages' )
 for k, page in pairs( pages ) do
-    --is there a file already there?!
-    local f, err = io.open( 'build/pages/' .. page.link, 'r' )
-
-    if not f or ( arg[1] and arg[1] == 'all' ) then
+    local dest_file
+    if config.link_dirs then
+        lfs.mkdir( 'build/pages/' .. page.link )
+        dest_file = 'build/pages/' .. page.link .. '/index.html'
+    else
+        dest_file = 'build/pages/' .. page.link
+    end
+    --check modification time on post & destination files
+    local attributes = lfs.attributes( dest_file )
+    if attributes and page.time > attributes.modification then
         --we're a page, so change up page_links
         template:set( 'page_links', luapress_page_links( page.link ) )
         --set page
         template:set( 'page', page )
 
-        local output = template:process( templates.header ) .. template:process( templates.page ) .. template:process( templates.footer )
+        local output = template:process( templates.header.content ) .. template:process( templates.page.content ) .. template:process( templates.footer.content )
 
-        if config.link_dirs then
-            lfs.mkdir( 'build/pages/' .. page.link )
-            f, err = io.open( 'build/pages/' .. page.link .. '/index.html', 'w' )
-        else
-            f, err = io.open( 'build/pages/' .. page.link, 'w' )
-        end
-
+        f, err = io.open( dest_file, 'w' )
         if not f then error( err ) end
         local result, err = f:write( output )
         if not result then error( err ) end
 
         f:close()
+        print( '\t' .. page.title )
     end
 end
 template:set( 'page', false )
@@ -263,8 +283,7 @@ template:set( 'page', false )
 
 --reset page_links for indexes
 template:set( 'page_links', luapress_page_links() )
-print( '[Luapress]: Building indexes' )
-
+print( '[6] Building index pages' )
 --iterate to generate indexes
 local index = 1
 local count = 0
@@ -272,7 +291,7 @@ local output = ''
 for k, post in pairs( posts ) do
     --add post to output, increase count
     template:set( 'post', post )
-    output = output .. template:process( templates.post )
+    output = output .. template:process( templates.post.content )
     count = count + 1
 
     --if we have n posts or are on last post, create current index, reset
@@ -301,20 +320,21 @@ for k, post in pairs( posts ) do
         end
 
         --create and write output
-        output = template:process( templates.header ) .. output .. template:process( templates.footer )
+        output = template:process( templates.header.content ) .. output .. template:process( templates.footer.content )
         local result, err = f:write( output )
         if not result then error( err ) end
 
         --reset & close f
         count = 0
-        index = index + 1
         output = ''
         f:close()
+        print( '\tindex ' .. index )
+        index = index + 1
     end
 end
 
 --build rss of last 10 posts
-print( '[Luapress]: Building rss' )
+print( '[7] Building RSS' )
 local rssposts = {}
 for k, post in pairs( posts ) do
     if k <= 10 then
@@ -326,14 +346,14 @@ for k, post in pairs( posts ) do
     end
 end
 template:set( 'posts', rssposts )
-local rss = template:process( templates.rss )
+local rss = template:process( templates.rss.content )
 local f, err = io.open( 'build/index.xml', 'w' )
 if not f then error( err ) end
 local result, err = f:write( rss )
 if not result then error( err ) end
 
 --finally, copy over inc to build inc
-print( '[Luapress]: Copy inc' )
+print( '[8] Copying new inc files' )
 function copy_dir( dir, dest )
     for file in lfs.dir( dir ) do
         if file ~= '.' and file ~= '..' then
@@ -349,8 +369,8 @@ function copy_dir( dir, dest )
 
             --file?
             if attributes.mode and attributes.mode == 'file' then
-                --do we have the file?
-                if not io.open( dest .. file, 'r' ) or arg[1] == 'all' then
+                local dest_attributes = lfs.attributes( dest .. file )
+                if dest_attributes and dest_attributes.modification < attributes.modification then
                     --open current file
                     local f, err = io.open( dir .. file, 'r' )
                     if not f then error( err ) end
@@ -364,6 +384,8 @@ function copy_dir( dir, dest )
                     local result, err = f:write( s )
                     if not result then error( err ) end
                     f:close()
+
+                    print( '\t' .. dest .. file )
                 end
             end
         end
@@ -372,4 +394,6 @@ end
 copy_dir( 'inc/', 'build/inc/' )
 copy_dir( 'templates/' .. config.template .. '/inc/', 'build/inc/template/' )
 
-print( '[Luapress]: Complete! Upload ./build to your website' )
+print( '#' )
+print( 'Luapress Complete! Upload ./build to your website' )
+print( '#' )
