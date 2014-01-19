@@ -1,4 +1,4 @@
-#Luapress
+#Luapress v1.0.0
 
 Luapress is *yet another* static blog generator, written in Lua. This blog is it's testing ground.
 
@@ -9,6 +9,7 @@ Luapress is *yet another* static blog generator, written in Lua. This blog is it
 
 **How-To:**
 
++ Download [an Luapress release](https://github.com/Fizzadar/Luapress/releases) or clone this development repo
 + Rename `config.example.lua` => `config.lua`
 + Set url to your live or staging location
 + Drop markdown (.md) files in posts/ and pages/
