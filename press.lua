@@ -125,7 +125,7 @@ for file in lfs.dir( 'posts/' ) do
 
         --date set?
         if post.date then
-            local a, b, d, m, y = post.date:find( '(%d+)\/(%d+)\/(%d+)' )
+            local a, b, d, m, y = post.date:find( '(%d+)%/(%d+)%/(%d+)' )
             post.time = os.time( { day = d, month = m, year = y } )
         end
 
