@@ -21,7 +21,7 @@ end
 
 --config & fix missing bits
 local config = require( 'config' )
-config.version = '1.0.0'
+config.version = '1.0.1'
 config.url = arg[1] or config.url
 config.description = config.description or 'A blog'
 
