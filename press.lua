@@ -1,5 +1,7 @@
 #!/usr/bin/env lua
 
+-- Luapress
+
 --[[
     1. get data
         1.1 get posts
@@ -21,7 +23,7 @@ end
 
 --config & fix missing bits
 local config = require( 'config' )
-config.version = '1.0.1'
+config.version = '1.0.2'
 config.url = arg[1] or config.url
 config.description = config.description or 'A blog'
 
@@ -232,7 +234,7 @@ for k, post in pairs( posts ) do
     end
     --check modification time on post & destination files
     local attributes = lfs.attributes( dest_file )
-    if attributes and post.time > attributes.modification then
+    --if not config.cache or ( attributes and post.time > attributes.modification ) then
         --set post
         template:set( 'post', post )
 
@@ -245,7 +247,7 @@ for k, post in pairs( posts ) do
 
         f:close()
         print( '\t' .. post.title )
-    end
+    --end
 end
 template:set( 'single', false )
 
@@ -261,7 +263,7 @@ for k, page in pairs( pages ) do
     end
     --check modification time on post & destination files
     local attributes = lfs.attributes( dest_file )
-    if attributes and page.time > attributes.modification then
+    --if attributes and page.time > attributes.modification then
         --we're a page, so change up page_links
         template:set( 'page_links', luapress_page_links( page.link ) )
         --set page
@@ -276,7 +278,7 @@ for k, page in pairs( pages ) do
 
         f:close()
         print( '\t' .. page.title )
-    end
+    --end
 end
 template:set( 'page', false )
 
