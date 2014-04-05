@@ -15,26 +15,59 @@
 --local optimization
 local require, print, error, table = require, print, error, table
 
---help?
-if arg[1] == 'help' then
-    print( './press.lua <optional url http://example.com>' )
-    return 0
-end
+--modules
+local lfs = require( 'lfs' )
+local markdown = require( 'lib/markdown' )
+local template = require( 'lib/template' )
+
 
 --config & fix missing bits
 local config = require( 'config' )
 config.version = '1.0.2'
-config.url = arg[1] or config.url
+config.url = arg[#arg]:sub( 1, 4 ) == 'http' and arg[#arg] or config.url
 config.description = config.description or 'A blog'
+
+--work out caching, default on
+config.cache = true
+
+--get last update time
+local attributes = lfs.attributes( '.cache' )
+config.cache_time = attributes and attributes.modification or 0
+
+--open + read cache url
+local f, err = io.open( '.cache', 'r' )
+if not f then error( err ) end
+local url, err = f:read( '*a' )
+if not url then error( err ) end
+f:close()
+
+--old cache w/ different url? disable cache for link changes
+if url ~= config.url then
+    config.cache = false
+end
+
+--write the url to cache
+local f, err = io.open( '.cache', 'w' )
+local status, err = f:write( config.url )
+if not status then error( err ) end
+f:close()
+
+--help?
+if arg[1] == 'help' then
+    print( '#' )
+    print( '# Luapress v' .. config.version )
+    print( '# Usage: ./press.lua <optional url: "http://example.com">' )
+    print( '# Example: ./press.lua' )
+    print( '# Example: ./press.lua http://example.com' )
+    print( '# For more details: https://github.com/Fizzadar/Luapress' )
+    print( '#' )
+    return 0
+end
 
 print( '#' )
 print( '# Luapress v' .. config.version .. ' for: ' .. config.url )
+print( '# Using cache: ' .. tostring( config.cache ))
 print( '#' )
-
---modules
-local lfs = require( 'lfs' )
-local markdown = require( 'lib/markdown' )
-template = require( 'lib/template' )
 
 --templates
 local templates = {}
@@ -89,111 +122,124 @@ templates.rss = {
 ]]}
 
 --get posts
-print( '[2] Loading posts' )
+print( '[2] Loading ' .. ( config.cache and 'new' or '' ) .. ' posts' )
 for file in lfs.dir( 'posts/' ) do
     if file:sub( -3 ) == '.md' then
-        --work out title
         local title = file:sub( 0, -4 )
-        local link = title:gsub( ' ', '_' ):gsub( '[^_aA-zZ0-9]', '' )
-        if not config.link_dirs then link = link .. '.html' end
         file = 'posts/' .. file
+        local attributes = lfs.attributes( file )
 
-        --get basic attributes
-        local post = {
-            link = link,
-            title = title,
-            content = '',
-            time = lfs.attributes( file ).modification
-        }
+        --cache enabled and/or not nodified since last build
+        if not config.cache or attributes.modification >= config.cache_time then
+            --work out title
+            local link = title:gsub( ' ', '_' ):gsub( '[^_aA-zZ0-9]', '' )
+            if not config.link_dirs then link = link .. '.html' end
 
-        --now read the file
-        local f, err = io.open( file, 'r' )
-        if not f then error( err ) end
-        local s, err = f:read( '*a' )
-        if not s then error( err ) end
+            --get basic attributes
+            local post = {
+                link = link,
+                title = title,
+                content = '',
+                time = attributes.modification
+            }
 
-        --get $key=value's
-        for k, v, c, d in s:gmatch( '%$([%w]+)=(.-)\n' ) do
-            post[k] = v
-            s = s:gsub( '%$[%w]+=.-\n', '' )
+            --now read the file
+            local f, err = io.open( file, 'r' )
+            if not f then error( err ) end
+            local s, err = f:read( '*a' )
+            if not s then error( err ) end
+
+            --get $key=value's
+            for k, v, c, d in s:gmatch( '%$([%w]+)=(.-)\n' ) do
+                post[k] = v
+                s = s:gsub( '%$[%w]+=.-\n', '' )
+            end
+
+            --excerpt
+            local start, finish = s:find( '--MORE--' )
+            if start then
+                post.excerpt = markdown( s:sub( 0, start - 1 ) )
+            end
+            post.content = markdown( s:gsub( '--MORE--', '' ) )
+
+            --date set?
+            if post.date then
+                local a, b, d, m, y = post.date:find( '(%d+)%/(%d+)%/(%d+)' )
+                post.time = os.time( { day = d, month = m, year = y } )
+            end
+
+            --insert to posts
+            table.insert( posts, post )
+
+            --log
+            print( '\t' .. post.title )
         end
-
-        --excerpt
-        local start, finish = s:find( '--MORE--' )
-        if start then
-            post.excerpt = markdown( s:sub( 0, start - 1 ) )
-        end
-        post.content = markdown( s:gsub( '--MORE--', '' ) )
-
-        --date set?
-        if post.date then
-            local a, b, d, m, y = post.date:find( '(%d+)%/(%d+)%/(%d+)' )
-            post.time = os.time( { day = d, month = m, year = y } )
-        end
-
-        --insert to posts
-        table.insert( posts, post )
-
-        --log
-        print( '\t' .. post.title )
     end
 end
 --sort posts by time
 table.sort( posts, function( a, b ) return tonumber( a.time ) > tonumber( b.time ) end )
 
 --get pages
-print( '[3] Loading pages' )
+print( '[3] Loading ' .. ( config.cache and 'new' or '' ) .. ' pages' )
 for file in lfs.dir( 'pages/' ) do
     if file:sub( -3 ) == '.md' then
-        --work out title
         local title = file:sub( 0, -4 )
-        local link = title:gsub( ' ', '_' ):gsub( '[^_aA-zZ0-9]', '' )
-        if not config.link_dirs then link = link .. '.html' end
         file = 'pages/' .. file
+        local attributes = lfs.attributes( file )
 
-        --attributes
-        local page = {
-            link = link,
-            title = title,
-            content = '',
-            time = lfs.attributes( file ).modification
-        }
+        --cache enabled and/or not modified since last build
+        if not config.cache or attributes.modification >= config.cache_time then
+            --work out title
+            local link = title:gsub( ' ', '_' ):gsub( '[^_aA-zZ0-9]', '' )
+            if not config.link_dirs then link = link .. '.html' end
 
-        --now read the file
-        local f, err = io.open( file, 'r' )
-        if not f then error( err ) end
-        local s, err = f:read( '*a' )
-        if not s then error( err ) end
+            --attributes
+            local page = {
+                link = link,
+                title = title,
+                content = '',
+                time = attributes.modification
+            }
 
-        --get $key=value's
-        for k, v, c, d in s:gmatch( '%$([%w]+)=(.-)\n' ) do
-            page[k] = v
-            s = s:gsub( '%$[%w]+=.-\n', '' )
+            --now read the file
+            local f, err = io.open( file, 'r' )
+            if not f then error( err ) end
+            local s, err = f:read( '*a' )
+            if not s then error( err ) end
+
+            --get $key=value's
+            for k, v, c, d in s:gmatch( '%$([%w]+)=(.-)\n' ) do
+                page[k] = v
+                s = s:gsub( '%$[%w]+=.-\n', '' )
+            end
+
+            --set $=key's
+            s = s:gsub( '%$=url', config.url )
+
+            --string => markdown
+            page.content = markdown( s )
+
+            --insert to pages
+            if page.order then
+                table.insert( pages, page.order, page )
+            else
+                table.insert( pages, page )
+            end
+
+            --log
+            print( '\t' .. page.title )
         end
-
-        --set $=key's
-        s = s:gsub( '%$=url', config.url )
-
-        --string => markdown
-        page.content = markdown( s )
-
-        --insert to pages
-        if page.order then
-            table.insert( pages, page.order, page )
-        else
-            table.insert( pages, page )
-        end
-
-        --log
-        print( '\t' .. page.title )
     end
 end
---archive page/index
-template:set( 'posts', posts )
-template:set( 'page', { title = Archive } )
-local link = 'Archive'
-if not config.link_dirs then link = link .. '.html' end
-table.insert( pages, { link = link, title = 'Archive', time = os.time(), content = template:process( templates.archive.content ) } )
+
+if #posts > 0 then
+    --archive page/index
+    template:set( 'posts', posts )
+    template:set( 'page', { title = Archive } )
+    local link = 'Archive'
+    if not config.link_dirs then link = link .. '.html' end
+    table.insert( pages, { link = link, title = 'Archive', time = os.time(), content = template:process( templates.archive.content ) } )
+end
 
 
 --make sure we have our directories
@@ -222,7 +268,7 @@ template:set( 'page_links', luapress_page_links() )
 
 
 --begin generation of post pages
-print( '[4] Building new posts' )
+print( '[4] Building ' .. ( config.cache and 'new' or '' ) .. ' posts' )
 template:set( 'single', true )
 for k, post in pairs( posts ) do
     local dest_file
@@ -234,7 +280,7 @@ for k, post in pairs( posts ) do
     end
     --check modification time on post & destination files
     local attributes = lfs.attributes( dest_file )
-    --if not config.cache or ( attributes and post.time > attributes.modification ) then
+    if not config.cache or not attributes or post.time > attributes.modification then
         --set post
         template:set( 'post', post )
 
@@ -247,12 +293,12 @@ for k, post in pairs( posts ) do
 
         f:close()
         print( '\t' .. post.title )
-    --end
+    end
 end
 template:set( 'single', false )
 
 --begin generation of page pages
-print( '[5] Building new pages' )
+print( '[5] Building ' .. ( config.cache and 'new' or '' ) .. ' pages' )
 for k, page in pairs( pages ) do
     local dest_file
     if config.link_dirs then
@@ -263,7 +309,7 @@ for k, page in pairs( pages ) do
     end
     --check modification time on post & destination files
     local attributes = lfs.attributes( dest_file )
-    --if attributes and page.time > attributes.modification then
+    if not config.cache or not attributes or page.time > attributes.modification then
         --we're a page, so change up page_links
         template:set( 'page_links', luapress_page_links( page.link ) )
         --set page
@@ -278,7 +324,7 @@ for k, page in pairs( pages ) do
 
         f:close()
         print( '\t' .. page.title )
-    --end
+    end
 end
 template:set( 'page', false )
 
@@ -373,7 +419,7 @@ function copy_dir( dir, dest )
             --file?
             if attributes.mode and attributes.mode == 'file' then
                 local dest_attributes = lfs.attributes( dest .. file )
-                if not dest_attributes or dest_attributes.modification < attributes.modification then
+                if not dest_attributes or attributes.modification > dest_attributes.modification then
                     --open current file
                     local f, err = io.open( dir .. file, 'r' )
                     if not f then error( err ) end

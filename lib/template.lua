@@ -38,7 +38,10 @@ function template:process( code )
     --close final output and return concat of the table
     code = code .. ' \n]] return output'
 
-    local func = loadstring( code )
+    --allow self = template to work
+    local func, env = loadstring( code ), _G
+    env.template = self
+    setfenv( func, env )
     return func()
 end
 
