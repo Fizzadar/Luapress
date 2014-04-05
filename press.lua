@@ -373,7 +373,7 @@ function copy_dir( dir, dest )
             --file?
             if attributes.mode and attributes.mode == 'file' then
                 local dest_attributes = lfs.attributes( dest .. file )
-                if dest_attributes and dest_attributes.modification < attributes.modification then
+                if not dest_attributes or dest_attributes.modification < attributes.modification then
                     --open current file
                     local f, err = io.open( dir .. file, 'r' )
                     if not f then error( err ) end
