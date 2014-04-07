@@ -36,8 +36,9 @@ config.cache_time = attributes and attributes.modification or 0
 
 --open + read cache url
 local f, err = io.open( '.cache', 'r' )
+local url
 if f then
-    local url, err = f:read( '*a' )
+    url, err = f:read( '*a' )
     if not url then error( err ) end
     f:close()
 end
