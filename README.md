@@ -9,6 +9,14 @@ Luapress is *yet another* static blog generator, written in Lua.
 
 **How-To:**
 
+    #
+    # Luapress v1.0.3
+    # Usage: ./press.lua <optional url: "http://example.com">
+    # Example: ./press.lua
+    # Example: ./press.lua http://example.com
+    # For more details: https://github.com/Fizzadar/Luapress
+    #
+
 + Download [an Luapress release](https://github.com/Fizzadar/Luapress/releases) or clone this development repo
 + Rename `config.example.lua` => `config.lua`
 + Set url to your live or staging location
