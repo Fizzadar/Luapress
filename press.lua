@@ -54,6 +54,13 @@ local status, err = f:write( config.url )
 if not status then error( err ) end
 f:close()
 
+--nocache in cmd line?
+for _, v in ipairs( arg ) do
+    if v == 'nocache' then
+        config.cache = false
+    end
+end
+
 --help?
 if arg[1] == 'help' then
     print( '#' )
@@ -61,6 +68,7 @@ if arg[1] == 'help' then
     print( '# Usage: ./press.lua <optional url: "http://example.com">' )
     print( '# Example: ./press.lua' )
     print( '# Example: ./press.lua http://example.com' )
+    print( '# Example: ./press.lua nocache http://example.com' )
     print( '# For more details: https://github.com/Fizzadar/Luapress' )
     print( '#' )
     return 0

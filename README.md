@@ -14,6 +14,7 @@ Luapress is *yet another* static blog generator, written in Lua.
     # Usage: ./press.lua <optional url: "http://example.com">
     # Example: ./press.lua
     # Example: ./press.lua http://example.com
+    # Example: ./press.lua nocache http://example.com
     # For more details: https://github.com/Fizzadar/Luapress
     #
 
@@ -32,6 +33,7 @@ Luapress is *yet another* static blog generator, written in Lua.
 + Set `$time=time_in_epoch_seconds` or `$date=day/month/year` to customize post time (default file update time)
 + With pages set `$order=number` to determine page ordering in links list
 + Hide pages from the link list with `$hidden=true`
++ Add `cache` before the URL in your shell to ignore caching (for template dev)
 
 **Example:**
 
