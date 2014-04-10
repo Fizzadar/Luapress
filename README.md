@@ -1,4 +1,4 @@
-#Luapress v1.0.4
+#Luapress v1.0.5
 
 Luapress is *yet another* static blog generator, written in Lua.
 
@@ -10,7 +10,7 @@ Luapress is *yet another* static blog generator, written in Lua.
 **How-To:**
 
     #
-    # Luapress v1.0.3
+    # Luapress v1.0.5
     # Usage: ./press.lua <optional url: "http://example.com">
     # Example: ./press.lua
     # Example: ./press.lua http://example.com

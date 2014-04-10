@@ -23,7 +23,7 @@ local template = require( 'lib/template' )
 
 --config & fix missing bits
 local config = require( 'config' )
-config.version = '1.0.3'
+config.version = '1.0.5'
 config.url = arg[#arg]:sub( 1, 4 ) == 'http' and arg[#arg] or config.url
 config.description = config.description or 'A blog'
 
@@ -124,7 +124,7 @@ templates.rss = {
 ]]}
 
 --get posts
-print( '[2] Loading ' .. ( config.cache and 'new' or '' ) .. ' posts' )
+print( '[2] Loading ' .. ( config.cache and 'new ' or '' ) .. 'posts' )
 for file in lfs.dir( 'posts/' ) do
     if file:sub( -3 ) == '.md' then
         local title = file:sub( 0, -4 )
@@ -182,7 +182,7 @@ end
 table.sort( posts, function( a, b ) return tonumber( a.time ) > tonumber( b.time ) end )
 
 --get pages
-print( '[3] Loading ' .. ( config.cache and 'new' or '' ) .. ' pages' )
+print( '[3] Loading ' .. ( config.cache and 'new ' or '' ) .. 'pages' )
 for file in lfs.dir( 'pages/' ) do
     if file:sub( -3 ) == '.md' then
         local title = file:sub( 0, -4 )
@@ -270,7 +270,7 @@ template:set( 'page_links', luapress_page_links() )
 
 
 --begin generation of post pages
-print( '[4] Building ' .. ( config.cache and 'new' or '' ) .. ' posts' )
+print( '[4] Building ' .. ( config.cache and 'new ' or '' ) .. 'posts' )
 template:set( 'single', true )
 for k, post in pairs( posts ) do
     local dest_file
@@ -300,7 +300,7 @@ end
 template:set( 'single', false )
 
 --begin generation of page pages
-print( '[5] Building ' .. ( config.cache and 'new' or '' ) .. ' pages' )
+print( '[5] Building ' .. ( config.cache and 'new ' or '' ) .. 'pages' )
 for k, page in pairs( pages ) do
     local dest_file
     if config.link_dirs then
@@ -404,7 +404,7 @@ local result, err = f:write( rss )
 if not result then error( err ) end
 
 --finally, copy over inc to build inc
-print( '[8] Copying new inc files' )
+print( '[8] Copying inc files' )
 function copy_dir( dir, dest )
     for file in lfs.dir( dir ) do
         if file ~= '.' and file ~= '..' then
