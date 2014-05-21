@@ -23,12 +23,13 @@ local template = require('lib/template')
 
 --config & fix missing bits
 local config = require('config')
-config.version = '1.0.5'
+config.version = '1.1.0'
 config.url = arg[#arg]:sub(1, 4) == 'http' and arg[#arg] or config.url
 config.description = config.description or 'A blog'
 
---work out caching, default on
+--work out caching/cleaning, default on
 config.cache = true
+config.clean = false
 
 --get last update time
 local attributes = lfs.attributes('.cache')
@@ -54,11 +55,18 @@ local status, err = f:write(config.url)
 if not status then error(err) end
 f:close()
 
---nocache in cmd line?
+--nocache/clean in cmd line?
 for _, v in ipairs(arg) do
     if v == 'nocache' then
         config.cache = false
     end
+    if v == 'clean' then
+        config.clean = true
+    end
+end
+--ensure
+if config.clean then
+    config.cache = false
 end
 
 --help?
@@ -77,6 +85,35 @@ end
 print('#')
 print('# Luapress v' .. config.version .. ' for: ' .. config.url)
 print('# Using cache: ' .. tostring(config.cache))
+if config.clean then
+    print('# Clean enabled')
+
+    local function iter_dir(dir)
+        dir = dir .. '/'
+        local out_files = {}
+
+        for file in lfs.dir(dir) do
+            if file ~= '..' and file ~= '.' and file ~= '.keepme' then
+                local attributes = lfs.attributes(dir .. file)
+                if attributes.mode == 'directory' then
+                    local fs = iter_dir(dir .. file)
+                    for _, f in pairs(fs) do
+                        table.insert(out_files, f)
+                    end
+                else
+                    table.insert(out_files, dir .. file)
+                end
+            end
+        end
+
+        return out_files
+    end
+
+    local files = iter_dir('build')
+    for _, f in ipairs(files) do
+        os.remove(f)
+    end
+end
 print('#')
 
 --templates
@@ -293,8 +330,8 @@ for k, post in pairs(posts) do
     if not config.cache or not attributes or post.time > attributes.modification then
         --set post
         template:set('post', post)
-
-        local output = template:process(templates.header.content) .. template:process(templates.post.content) .. template:process(templates.footer.content)
+        --build html
+        local output = template:process(templates.header.content, templates.post.content, templates.footer.content)
 
         f, err = io.open(dest_file, 'w')
         if not f then error(err) end
@@ -324,8 +361,8 @@ for k, page in pairs(pages) do
         template:set('page_links', luapress_page_links(page.link))
         --set page
         template:set('page', page)
-
-        local output = template:process(templates.header.content) .. template:process(templates.page.content) .. template:process(templates.footer.content)
+        --build html
+        local output = template:process(templates.header.content, templates.page.content, templates.footer.content)
 
         f, err = io.open(dest_file, 'w')
         if not f then error(err) end
