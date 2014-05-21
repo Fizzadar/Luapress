@@ -1,18 +1,17 @@
 #normal
 .DS_Store
 
-#pre-build
-pages/*.md
-posts/*.md
+config.lua
 
-#post-build
-build/*.html
-build/pages/*.html
-build/posts/*.html
-build/inc/template/*.css
-*.png
-*.gif
-*.jpeg
-*.jpg
+pages/*
+!pages/.keepme
+posts/*
+!posts/.keepme
+build/*
+!build/.keepme
+inc/*
+!inc/.keepme
+templates/*
+!templates/default/
 
 .cache
