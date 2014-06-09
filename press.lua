@@ -449,12 +449,14 @@ for k, post in pairs(posts) do
         break
     end
 end
-template:set('posts', rssposts)
-local rss = template:process(templates.rss.content)
-local f, err = io.open('build/index.xml', 'w')
-if not f then error(err) end
-local result, err = f:write(rss)
-if not result then error(err) end
+if #rssposts > 0 then
+    template:set('posts', rssposts)
+    local rss = template:process(templates.rss.content)
+    local f, err = io.open('build/index.xml', 'w')
+    if not f then error(err) end
+    local result, err = f:write(rss)
+    if not result then error(err) end
+end
 
 --finally, copy over inc to build inc
 print('[8] Copying inc files')
