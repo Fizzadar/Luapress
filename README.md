@@ -1,4 +1,4 @@
-# Luapress v1.1.0
+# Luapress v1.1.1
 
 Luapress is *yet another* static blog generator, written in Lua, with posts in markdown.
 
