@@ -169,113 +169,107 @@ templates.rss = {
 ]]}
 
 --get posts
-print('[2] Loading ' .. (config.cache and 'new ' or '') .. 'posts')
+print('[2] Loading ' .. 'posts')
 for file in lfs.dir('posts/') do
     if file:sub(-3) == '.md' then
         local title = file:sub(0, -4)
         file = 'posts/' .. file
         local attributes = lfs.attributes(file)
 
-        --cache enabled and/or not nodified since last build
-        if not config.cache or attributes.modification >= config.cache_time then
-            --work out title
-            local link = title:gsub(' ', '_'):gsub('[^_aA-zZ0-9]', '')
-            if not config.link_dirs then link = link .. '.html' end
+        --work out title
+        local link = title:gsub(' ', '_'):gsub('[^_aA-zZ0-9]', '')
+        if not config.link_dirs then link = link .. '.html' end
 
-            --get basic attributes
-            local post = {
-                link = link,
-                title = title,
-                content = '',
-                time = attributes.modification
-            }
+        --get basic attributes
+        local post = {
+            link = link,
+            title = title,
+            content = '',
+            time = attributes.modification
+        }
 
-            --now read the file
-            local f, err = io.open(file, 'r')
-            if not f then error(err) end
-            local s, err = f:read('*a')
-            if not s then error(err) end
+        --now read the file
+        local f, err = io.open(file, 'r')
+        if not f then error(err) end
+        local s, err = f:read('*a')
+        if not s then error(err) end
 
-            --get $key=value's
-            for k, v, c, d in s:gmatch('%$([%w]+)=(.-)\n') do
-                post[k] = v
-                s = s:gsub('%$[%w]+=.-\n', '')
-            end
-
-            --excerpt
-            local start, finish = s:find('--MORE--')
-            if start then
-                post.excerpt = markdown(s:sub(0, start - 1))
-            end
-            post.content = markdown(s:gsub('--MORE--', ''))
-
-            --date set?
-            if post.date then
-                local a, b, d, m, y = post.date:find('(%d+)%/(%d+)%/(%d+)')
-                post.time = os.time({ day = d, month = m, year = y })
-            end
-
-            --insert to posts
-            table.insert(posts, post)
-
-            --log
-            print('\t' .. post.title)
+        --get $key=value's
+        for k, v, c, d in s:gmatch('%$([%w]+)=(.-)\n') do
+            post[k] = v
+            s = s:gsub('%$[%w]+=.-\n', '')
         end
+
+        --excerpt
+        local start, finish = s:find('--MORE--')
+        if start then
+            post.excerpt = markdown(s:sub(0, start - 1))
+        end
+        post.content = markdown(s:gsub('--MORE--', ''))
+
+        --date set?
+        if post.date then
+            local a, b, d, m, y = post.date:find('(%d+)%/(%d+)%/(%d+)')
+            post.time = os.time({ day = d, month = m, year = y })
+        end
+
+        --insert to posts
+        table.insert(posts, post)
+
+        --log
+        print('\t' .. post.title)
     end
 end
 --sort posts by time
 table.sort(posts, function(a, b) return tonumber(a.time) > tonumber(b.time) end)
 
 --get pages
-print('[3] Loading ' .. (config.cache and 'new ' or '') .. 'pages')
+print('[3] Loading ' .. 'pages')
 for file in lfs.dir('pages/') do
     if file:sub(-3) == '.md' then
         local title = file:sub(0, -4)
         file = 'pages/' .. file
         local attributes = lfs.attributes(file)
 
-        --cache enabled and/or not modified since last build
-        if not config.cache or attributes.modification >= config.cache_time then
-            --work out title
-            local link = title:gsub(' ', '_'):gsub('[^_aA-zZ0-9]', '')
-            if not config.link_dirs then link = link .. '.html' end
+        --work out title
+        local link = title:gsub(' ', '_'):gsub('[^_aA-zZ0-9]', '')
+        if not config.link_dirs then link = link .. '.html' end
 
-            --attributes
-            local page = {
-                link = link,
-                title = title,
-                content = '',
-                time = attributes.modification
-            }
+        --attributes
+        local page = {
+            link = link,
+            title = title,
+            content = '',
+            time = attributes.modification
+        }
 
-            --now read the file
-            local f, err = io.open(file, 'r')
-            if not f then error(err) end
-            local s, err = f:read('*a')
-            if not s then error(err) end
+        --now read the file
+        local f, err = io.open(file, 'r')
+        if not f then error(err) end
+        local s, err = f:read('*a')
+        if not s then error(err) end
 
-            --get $key=value's
-            for k, v, c, d in s:gmatch('%$([%w]+)=(.-)\n') do
-                page[k] = v
-                s = s:gsub('%$[%w]+=.-\n', '')
-            end
-
-            --set $=key's
-            s = s:gsub('%$=url', config.url)
-
-            --string => markdown
-            page.content = markdown(s)
-
-            --insert to pages
-            if page.order then
-                table.insert(pages, page.order, page)
-            else
-                table.insert(pages, page)
-            end
-
-            --log
-            print('\t' .. page.title)
+        --get $key=value's
+        for k, v, c, d in s:gmatch('%$([%w]+)=(.-)\n') do
+            page[k] = v
+            s = s:gsub('%$[%w]+=.-\n', '')
         end
+
+        --set $=key's
+        s = s:gsub('%$=url', config.url)
+
+        --string => markdown
+        page.content = markdown(s)
+
+        --insert to pages
+        if page.order then
+            table.insert(pages, page.order, page)
+        else
+            table.insert(pages, page)
+        end
+
+        --log
+        print('\t' .. page.title)
     end
 end
 
