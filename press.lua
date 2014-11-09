@@ -23,7 +23,7 @@ local template = require('lib/template')
 
 --config & fix missing bits
 local config = require('config')
-config.version = '1.1.0'
+config.version = '1.1.1'
 config.url = arg[#arg]:sub(1, 4) == 'http' and arg[#arg] or config.url
 config.description = config.description or 'A blog'
 
