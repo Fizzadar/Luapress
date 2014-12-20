@@ -194,6 +194,9 @@ for file in lfs.dir('posts/') do
         local s, err = f:read('*a')
         if not s then error(err) end
 
+        --set $=key's
+        s = s:gsub('%$=url', config.url)
+
         --get $key=value's
         for k, v, c, d in s:gmatch('%$([%w]+)=(.-)\n') do
             post[k] = v

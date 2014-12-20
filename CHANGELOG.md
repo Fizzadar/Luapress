@@ -1,3 +1,7 @@
+# v1.1.2
+
++ Add $=url support to posts
+
 # v1.1.1
 
 + Fix bug in cache: empty archive and/or missing page links
