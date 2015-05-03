@@ -1,17 +1,1 @@
-#normal
 .DS_Store
-
-config.lua
-
-pages/*
-!pages/.keepme
-posts/*
-!posts/.keepme
-build/*
-!build/.keepme
-inc/*
-!inc/.keepme
-templates/*
-!templates/default/
-
-.cache
