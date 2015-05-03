@@ -1,0 +1,124 @@
+#!/usr/bin/env lua
+
+-- Luapress
+-- File: bin/luapress
+-- Desc: Luapress CLI
+
+local doc = [[
+Luapress
+
+Usage:
+    luapress [<url>]
+    luapress [--nocache] [<url>]
+    luapress init <url>
+    luapress --help
+
+Options:
+    <url>       Base URL to build links from.
+    init        Start new blog in the current directory.
+    --nocache   Rewrite everything, ignoring update times.
+    -h --help   Show this help screen.
+    --version   Show version.]]
+
+require('alt_getopt')
+
+-- Handle input/docstring
+local opts, idn = alt_getopt.get_opts(arg, 'nhv', {
+    nocache = 'n',
+    help = 'h',
+    version='v'
+})
+
+-- Handle help output/exit
+if opts.h then
+    print(doc)
+    os.exit()
+end
+
+-- Handle version output/exit
+if opts.v then
+    local config = require('luapress.config')
+    print('Luapress v' .. config.version)
+    os.exit()
+end
+
+
+local lfs = require('lfs')
+local luapress = require('luapress')
+
+-- Turn opts into something more readable
+local opts = {
+    cache = opts.n ~= 1,
+    init = arg[idn] == 'init'
+}
+
+-- Init?
+if opts.init then
+    local url = arg[idn + 1]
+    if not url then
+        print('Missing <url> parameter, please use: luapress init <url>')
+        os.exit(1)
+    end
+
+    local status, err = luapress.make_skeleton(lfs.currentdir(), url)
+    if err then
+        print(err)
+        os.exit(1)
+    end
+
+    print('All ready! Just drop markdown files into ./posts & ./pages and run luapress')
+    os.exit()
+end
+
+
+-- Ensure local config file
+local _, err = io.open('config.lua', 'r')
+if err then
+    print(err)
+    print('Missing ./config.lua, have you run `luapress init`?')
+    os.exit(1)
+end
+
+-- Load the local config file
+local config = require('config')
+
+-- Check/setup url
+config.url = arg[idn] or config.url
+-- Attach opts to config
+config.cache = opts.cache
+config.print = true
+
+-- Read the "previous url" from the cache file
+local f, err = io.open('.luapress', 'r')
+if f then
+    url, err = f:read('*a')
+    if err then
+        print('Could not read cache file .luapress: ' .. err)
+        os.exit(1)
+    end
+
+    -- If the url is new, no caching
+    if url ~= config.url then
+        config.cache = false
+    end
+
+    f:close()
+end
+
+-- Build the blog
+local status, err = luapress.build(lfs.currentdir(), config)
+if err then
+    print(err)
+    os.exit(1)
+end
+
+-- Save the url to the local cache file
+local f, err = io.open('.luapress', 'w')
+if f then
+    f:write(config.url)
+    f:close()
+end
+
+print('')
+print('Press complete! Upload ./build to your website')
+os.exit()
