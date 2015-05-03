@@ -1,3 +1,11 @@
+# v2.0.0
+
++ Lua 5.2 support
++ Rockspec/Luarocks
++ Bin executable
++ `luapress init <url>` functionality
++ Rewritten, broken up into utils
+
 # v1.1.2
 
 + Add $=url support to posts
