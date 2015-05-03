@@ -4,8 +4,11 @@
 -- File: bin/luapress
 -- Desc: Luapress CLI
 
+local luapress_config = require('luapress.config')
+
 local doc = [[
-Luapress
+Luapress v]] .. luapress_config.version .. [[
+
 
 Usage:
     luapress [<url>]
@@ -37,8 +40,8 @@ end
 
 -- Handle version output/exit
 if opts.v then
-    local config = require('luapress.config')
-    print('Luapress v' .. config.version)
+
+    print('Luapress v' .. luapress_config.version)
     os.exit()
 end
 
