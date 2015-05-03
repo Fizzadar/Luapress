@@ -1,6 +1,6 @@
         <div class="biglinks">
-            <? if self:get( 'previous_page' ) then ?><a class="left" href="<?=self:get( 'url' ) ?>/<?=self:get( 'previous_page' ) ?>">&larr; Previous Page</a><? end ?>
-            <? if self:get( 'next_page' ) then ?><a class="right" href="<?=self:get( 'url' ) ?>/<?=self:get( 'next_page' ) ?>">Next Page &rarr;</a><? end ?>
+            <? if self:get('previous_page') then ?><a class="left" href="<?=self:get('url') ?>/<?=self:get('previous_page') ?>">&larr; Previous Page</a><? end ?>
+            <? if self:get('next_page') then ?><a class="right" href="<?=self:get('url') ?>/<?=self:get('next_page') ?>">Next Page &rarr;</a><? end ?>
         </div><!--end biglinks-->
 
         <div id="footer">
