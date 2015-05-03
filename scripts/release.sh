@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VERSION=`cat press.lua | grep config.version | grep -oEi "[0-9]+\.[0-9]+\.[0-9]+"`
+VERSION=`cat luapress/config.lua | grep version | grep -oEi "[0-9]+\.[0-9]+\.[0-9]+"`
 
 echo "# Luapress"
 echo "# Releasing: v$VERSION"
