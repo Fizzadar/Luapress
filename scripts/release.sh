@@ -9,4 +9,3 @@ git tag -a "v$VERSION" -m "v$VERSION"
 git push --tags
 
 echo "# Done!"
-
