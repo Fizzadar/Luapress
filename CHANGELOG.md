@@ -1,3 +1,7 @@
+# v2.0.1
+
++ Fix bug with markdown & code blocks
+
 # v2.0.0
 
 + Lua 5.2 support
