@@ -150,21 +150,21 @@ local function load_templates(directory)
     templates.rss = {
         time = 0,
         content = [[
-    <?xml version="1.0" encoding="utf-8"?>
-    <rss version="2.0">
-        <channel>
-            <title><?=self:get('title') ?></title>
-            <link><?=self:get('url') ?></link>
-    <? for k, post in pairs(self:get('posts')) do ?>
-            <item>
-                <title><?=post.title ?></title>
-                <description><?=post.excerpt ?></description>
-                <link><?=self:get('url') ?>/posts/<?=post.link ?></link>
-                <guid><?=self:get('url') ?>/posts/<?=post.link ?></guid>
-            </item>
-    <? end ?>
-        </channel>
-    </rss>
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+    <channel>
+        <title><?=self:get('title') ?></title>
+        <link><?=self:get('url') ?></link>
+<? for k, post in pairs(self:get('posts')) do ?>
+        <item>
+            <title><?=post.title ?></title>
+            <description><? if post.excerpt then ?><?=post.excerpt ?><? else ?><?=post.content ?><? end ?></description>
+            <link><?=self:get('url') ?>/posts/<?=post.link ?></link>
+            <guid><?=self:get('url') ?>/posts/<?=post.link ?></guid>
+        </item>
+<? end ?>
+    </channel>
+</rss>
     ]]}
 
     return templates
