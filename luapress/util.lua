@@ -102,12 +102,14 @@ local function load_markdowns(directory, config)
             end
 
             -- Excerpt
-            local start, finish = s:find('--MORE--')
+            local start, _ = s:find('--MORE--')
             if start then
-                s = s:sub(0, start - 1)
-                out.excerpt = markdown(s)
+                -- Extract the excerpt
+                out.excerpt = markdown(s:sub(0, start - 1))
+                -- Replace the --MORE--
+                s = s:gsub('%-%-MORE%-%-', '<a id="more">&nbsp;</a>')
             end
-            s = s:gsub('--MORE--', '')
+
             out.content = markdown(s)
 
             -- Date set?
