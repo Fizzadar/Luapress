@@ -33,6 +33,7 @@ Usage:
 + With pages set `$order=number` to determine page ordering in links list
 + Hide pages from the link list with `$hidden=true`
 + Add `--nocache` before the URL to ignore caching (for template dev)
++ Put `--MORE--` inside a post file to generate a excerpt/read-more link
 
 ## Example
 
