@@ -1,3 +1,8 @@
+# v2.0.2
+
++ Fix escaping on `--MORE--`
++ Fix RSS output
+
 # v2.0.1
 
 + Fix bug with markdown & code blocks
