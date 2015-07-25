@@ -1,3 +1,7 @@
+# v2.0.3
+
++ Customise the contents of the link `--MORE--` generates
+
 # v2.0.2
 
 + Fix escaping on `--MORE--`
