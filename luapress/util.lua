@@ -107,7 +107,8 @@ local function load_markdowns(directory, config)
                 -- Extract the excerpt
                 out.excerpt = markdown(s:sub(0, start - 1))
                 -- Replace the --MORE--
-                s = s:gsub('%-%-MORE%-%-', '<a id="more">&nbsp;</a>')
+                local sep = config.more_separator or ''
+                s = s:gsub('%-%-MORE%-%-', '<a id="more">' .. sep .. '</a>')
             end
 
             out.content = markdown(s)

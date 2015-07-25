@@ -210,7 +210,9 @@ local config = {
     -- Posts per page
     posts_per_page = 2,
     -- Link directories not files
-    link_dirs = true
+    link_dirs = true,
+    -- Separator to put inside <a id="more"></a> link
+    more_separator = ''
 }
 
 return config
