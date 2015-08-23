@@ -1,3 +1,8 @@
+# v2.0.4
+
++ Add `--build` option to change the directory to build the blog in
++ Fix handling of modification times on posts with manual time defined ($time=)
+
 # v2.0.3
 
 + Customise the contents of the link `--MORE--` generates

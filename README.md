@@ -9,11 +9,11 @@ Luapress is *yet another* static blog generator, written in Lua, with posts in m
 ## How-To
 
 ```
-Luapress v2.0.0
+Luapress v2
 
 Usage:
     luapress [<url>]
-    luapress [--nocache] [<url>]
+    luapress [--build <dir>] [--nocache] [<url>]
     luapress init <url>
     luapress --help
 ```
