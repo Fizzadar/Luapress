@@ -102,9 +102,9 @@ local function build(directory, config)
             -- Pick index file, open
             local f, err
             if index == 1 then
-                f, err = io.open(directory .. '/build/index.html', 'w')
+                f, err = io.open(directory .. '/' .. config.build_dir .. '/index.html', 'w')
             else
-                f, err = io.open(directory .. '/build/index' .. index .. '.html', 'w')
+                f, err = io.open(directory .. '/' .. config.build_dir .. '/index' .. index .. '.html', 'w')
             end
             if not f then error(err) end
 
@@ -159,7 +159,7 @@ local function build(directory, config)
     if #rssposts > 0 then
         template:set('posts', rssposts)
         local rss = template:process(templates.rss.content)
-        local f, err = io.open(directory .. '/build/index.xml', 'w')
+        local f, err = io.open(directory .. '/' .. config.build_dir .. '/index.xml', 'w')
         if not f then error(err) end
         local result, err = f:write(rss)
         if not result then error(err) end
@@ -167,13 +167,26 @@ local function build(directory, config)
 
     -- Copy inc directories
     if config.print then print('[8] Copying inc files') end
-    util.copy_dir(directory .. '/inc/', directory .. '/build/inc/')
+    util.copy_dir(directory .. '/inc/', directory .. '/' .. config.build_dir .. '/inc/')
     util.copy_dir(
         directory .. '/templates/' .. config.template .. '/inc/',
-        directory .. '/build/inc/template/'
+        directory .. '/' .. config.build_dir .. '/inc/template/'
     )
 
     return true
+end
+
+
+local function make_build(root, directory)
+    -- Make main directory
+    lfs.mkdir(root .. '/' .. directory)
+
+    -- Make sub directories
+    for _, sub_directory in ipairs({
+        'posts', 'pages', 'inc', 'inc/template'
+    }) do
+        lfs.mkdir(root .. '/' .. directory .. '/' .. sub_directory)
+    end
 end
 
 
@@ -181,7 +194,6 @@ local function make_skeleton(root, url)
     -- Make directories
     for _, directory in ipairs({
         'posts', 'pages', 'inc',
-        'build', 'build/posts', 'build/pages', 'build/inc', 'build/inc/template',
         'templates', 'templates/default', 'templates/default/inc'
     }) do
         lfs.mkdir(root .. '/' .. directory)
@@ -230,5 +242,6 @@ end
 -- Export
 return {
     build = build,
-    make_skeleton = make_skeleton
+    make_skeleton = make_skeleton,
+    make_build = make_build
 }

@@ -12,24 +12,26 @@ Luapress v]] .. luapress_config.version .. [[
 
 Usage:
     luapress [<url>]
-    luapress [--nocache] [<url>]
+    luapress [--build <dir>] [--nocache] [<url>]
     luapress init <url>
     luapress --help
 
 Options:
-    <url>       Base URL to build links from.
-    init        Start new blog in the current directory.
-    --nocache   Rewrite everything, ignoring update times.
-    -h --help   Show this help screen.
-    --version   Show version.]]
+    <url>         Base URL to build links from.
+    init          Start new blog in the current directory.
+    --nocache     Rewrite everything, ignoring update times.
+    --build <dir> Change the output dir (default=build).
+    -h --help     Show this help screen.
+    --version     Show version.]]
 
 require('alt_getopt')
 
 -- Handle input/docstring
-local opts, idn = alt_getopt.get_opts(arg, 'nhv', {
+local opts, idn = alt_getopt.get_opts(arg, 'nhvb', {
     nocache = 'n',
     help = 'h',
-    version='v'
+    version = 'v',
+    build = 'b'
 })
 
 -- Handle help output/exit
@@ -45,15 +47,23 @@ if opts.v then
     os.exit()
 end
 
-
 local lfs = require('lfs')
 local luapress = require('luapress')
+
+
+-- Handle build dir
+if opts.b then
+    opts.b = arg[idn]
+    idn = idn + 1
+end
 
 -- Turn opts into something more readable
 local opts = {
     cache = opts.n ~= 1,
-    init = arg[idn] == 'init'
+    init = arg[idn] == 'init',
+    build = opts.b or 'build'
 }
+
 
 -- Init?
 if opts.init then
@@ -90,6 +100,7 @@ config.url = arg[idn] or config.url
 -- Attach opts to config
 config.cache = opts.cache
 config.print = true
+config.build_dir = opts.build
 
 -- Read the "previous url" from the cache file
 local f, err = io.open('.luapress', 'r')
@@ -102,11 +113,15 @@ if f then
 
     -- If the url is new, no caching
     if url ~= config.url then
+        print('Disabling cache as url in .luapress different')
         config.cache = false
     end
 
     f:close()
 end
+
+-- Ensure the build directory
+luapress.make_build(lfs.currentdir(), config.build_dir)
 
 -- Build the blog
 local status, err = luapress.build(lfs.currentdir(), config)
@@ -123,5 +138,5 @@ if f then
 end
 
 print('')
-print('Press complete! Upload ./build to your website')
+print('Press complete! Upload ./' .. config.build_dir .. ' to your website')
 os.exit()

@@ -20,7 +20,8 @@ local template = require('luapress.template')
 local function write_html(destination, object, object_type, templates, config)
     -- Check modification time on post & destination files
     local attributes = lfs.attributes(destination)
-    if not config.cache or not attributes or object.time > attributes.modification then
+
+    if not (config.cache and attributes and object.modification) or object.modification > attributes.modification then
         local output = template:process(templates.header, templates[object_type], templates.footer)
 
         -- Write the file
@@ -38,11 +39,11 @@ end
 -- Returns the destination file given our config
 local function ensure_destination(directory, object_type, link, config)
     if config.link_dirs then
-        lfs.mkdir(directory .. '/build/' .. object_type .. '/' .. link)
-        return 'build/' .. object_type .. '/' .. link .. '/index.html'
+        lfs.mkdir(directory .. '/' .. config.build_dir .. '/' .. object_type .. '/' .. link)
+        return config.build_dir .. '/' .. object_type .. '/' .. link .. '/index.html'
     end
 
-    return 'build/' .. object_type .. '/' .. link
+    return config.build_dir .. '/' .. object_type .. '/' .. link
 end
 
 
@@ -83,7 +84,8 @@ local function load_markdowns(directory, config)
                 link = link,
                 title = title,
                 content = '',
-                time = attributes.modification
+                time = attributes.modification,
+                modification = attributes.modification -- stored separately as time can be overwritten w/$time=
             }
 
             -- Now read the file
