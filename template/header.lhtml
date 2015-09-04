@@ -25,6 +25,8 @@
             <h1><a href="<?=self:get('url') ?>"><?=self:get('title') ?></a></h1>
             <ul>
                 <?=self:get('page_links') ?>
-                <li><a href="<?=self:get('url') ?>/index.xml">RSS Feed</a></li>
+		<? if self:get('have_posts') then ?>
+                   <li><a href="<?=self:get('url') ?>/index.xml">RSS Feed</a></li>
+		<? end ?>
             </ul>
         </div><!--end header-->

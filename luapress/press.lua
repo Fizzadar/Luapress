@@ -69,6 +69,7 @@ local function build(directory, config)
     -- Build the pages
     if config.print then print('[5] Building ' .. (config.cache and 'new ' or '') .. 'pages') end
     template:set('single', false)
+    template:set('have_posts', #posts > 0)
 
     for _, page in pairs(pages) do
         local dest_file = util.ensure_destination(directory, 'pages', page.link, config)
