@@ -144,25 +144,60 @@ local function build(directory, config)
         end
     end
 
-    -- Build the RSS of last 10 posts
-    if config.print then print('[7] Building RSS') end
-    local rssposts = {}
-    for k, post in pairs(posts) do
-        if k <= 10 then
-            if post.excerpt then post.excerpt = post.excerpt:gsub('<[^>]+/?>', ' '):gsub('</[^>]+>', ' '):gsub('\n', '') end
-            post.title = post.title:gsub('%p', '')
-            table.insert(rssposts, post)
-        else
-            break
-        end
+    -- No posts at all, but at least one page?  Have an index.html anyway.
+    if index == 1 and next(pages) then
+	local idxpage
+	if config.index then
+	    -- use specified page
+	    for _, page in pairs(pages) do
+		if page.name == config.index then
+		    idxpage = page
+		    break
+		end
+	    end
+	else
+	    -- use first page
+	    idxpage = pages[next(pages)]
+	end
+
+	-- The "copy file" part of util.copy_dir could be refactored into
+	-- a separate function and used here.
+	if idxpage then
+	    local bdir = directory .. '/' .. config.build_dir .. '/'
+	    local f, err = io.open(bdir .. "pages/" .. idxpage.name .. ".html")
+	    if not f then error(err) end
+	    local s, err = f:read('*a')
+	    if not s then error(err) end
+	    f:close()
+
+	    f, err = io.open(bdir .. "index.html", "w")
+	    if not f then error(err) end
+	    f:write(s)
+	    f:close()
+	end
     end
-    if #rssposts > 0 then
-        template:set('posts', rssposts)
-        local rss = template:process(templates.rss.content)
-        local f, err = io.open(directory .. '/' .. config.build_dir .. '/index.xml', 'w')
-        if not f then error(err) end
-        local result, err = f:write(rss)
-        if not result then error(err) end
+
+    -- Build the RSS of last 10 posts
+    if index > 1 then
+	if config.print then print('[7] Building RSS') end
+	local rssposts = {}
+	for k, post in pairs(posts) do
+	    if k <= 10 then
+		if post.excerpt then post.excerpt = post.excerpt:gsub('<[^>]+/?>', ' '):gsub('</[^>]+>', ' '):gsub('\n', '') end
+		post.title = post.title:gsub('%p', '')
+		table.insert(rssposts, post)
+	    else
+		break
+	    end
+	end
+	if #rssposts > 0 then
+	    template:set('posts', rssposts)
+	    local rss = template:process(templates.rss.content)
+	    local f, err = io.open(directory .. '/' .. config.build_dir .. '/index.xml', 'w')
+	    if not f then error(err) end
+	    local result, err = f:write(rss)
+	    if not result then error(err) end
+	end
     end
 
     -- Copy inc directories

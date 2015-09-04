@@ -83,6 +83,7 @@ local function load_markdowns(directory, config)
             local out = {
                 link = link,
                 title = title,
+		name = title,
                 content = '',
                 time = attributes.modification,
                 modification = attributes.modification -- stored separately as time can be overwritten w/$time=
