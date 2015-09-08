@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <meta charset="UTF-8" />
+ <meta name="viewport" content="width=device-width, initial-scale=1" />
+ <meta name="HandheldFriendly" content="True" />
+ <meta name="MobileOptimized" content="320" />
+ <link rel="stylesheet" href="$url/inc/gallery.css" />
+ <title>$title</title>
+</head>
+<body>
+ <div><img src="$img" alt="" />$prev$next</div>
+ <p>$top</p>
+</body>
+</html>

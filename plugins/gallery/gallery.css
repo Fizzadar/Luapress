@@ -1,0 +1,11 @@
+div { font-size:0; position:relative; background-color:#f00; }
+img { width:100%; height:auto; }
+.lr { font:10rem/0 sans-serif;
+  position:absolute; top:0; bottom:0; z-index:1000;
+  text-decoration:none; color:#fff; cursor:pointer;
+  color:rgba(0,0,0,0.3);
+  display:-webkit-flex; display:flex; align-items:center;
+  -webkit-align-items:center;
+  /* background-color:rgba(0,0,0,0.1); */ }
+.left { left:5%; }
+.right { right:5%; }

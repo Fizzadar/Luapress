@@ -65,14 +65,17 @@ local function page_links(pages, active, config)
 end
 
 
+---
 -- Load markdown files in a directory
+-- @param directory  Subdirectory of config.root
+--
 local function load_markdowns(directory, config)
     local outs = {}
 
-    for file in lfs.dir(directory) do
+    for file in lfs.dir(config.root .. "/" .. directory) do
         if file:sub(-3) == '.md' then
             local title = file:sub(0, -4)
-            file = directory .. '/' .. file
+            file = config.root .. "/" .. directory .. '/' .. file
             local attributes = lfs.attributes(file)
 
             -- Work out title
@@ -83,6 +86,8 @@ local function load_markdowns(directory, config)
             local out = {
                 link = link,
                 title = title,
+		directory = directory,	-- relative to config.root
+		name = title,	-- same as title, but is not overwritten
                 content = '',
                 time = attributes.modification,
                 modification = attributes.modification -- stored separately as time can be overwritten w/$time=
@@ -102,6 +107,33 @@ local function load_markdowns(directory, config)
                 out[k] = v
                 s = s:gsub('%$[%w]+=.-\n', '')
             end
+
+	    -- Process calls to plugins: $! plugin arg, arg... !$
+	    local pos = 1
+	    while pos < #s do
+		local a, b = s:find('%$!.-!%$', pos)
+		if not a then break end
+		local s2 = s:sub(a + 2, b - 2)
+		local pl, arg = s2:match('^ *(%w+) *(.*)$')
+		if not pl then
+		    error('Empty plugin call in ' .. file)
+		end
+
+		-- convert args to a table
+		if #arg > 0 then
+		    arg = loadstring("return { " .. arg .. "}")()
+		else
+		    arg = {}
+		end
+
+		-- load the plugin.  For now only in the per-site directory.
+		local plugin = require('plugins/' .. pl .. '/init')
+
+		-- execute the plugin, replace markup by result
+		local res = plugin(out, config, arg)
+		s = s:sub(1, a - 1) .. res .. s:sub(b + 1)
+		pos = a + #res
+	    end
 
             -- Excerpt
             local start, _ = s:find('--MORE--')
