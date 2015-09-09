@@ -44,18 +44,18 @@ end
 
 
 -- Returns the destination file given our config
-local function ensure_destination(object_type, link, config)
+local function ensure_destination(item)
     if config.link_dirs then
-        lfs.mkdir(config.root .. '/' .. config.build_dir .. '/' .. object_type .. '/' .. link)
-        return config.build_dir .. '/' .. object_type .. '/' .. link .. '/index.html'
+        lfs.mkdir(config.root .. '/' .. config.build_dir .. '/' .. item.directory .. '/' .. item.link)
+        return config.build_dir .. '/' .. item.directory .. '/' .. item.link .. '/index.html'
     end
 
-    return config.build_dir .. '/' .. object_type .. '/' .. link
+    return config.build_dir .. '/' .. item.directory .. '/' .. item.link
 end
 
 
 -- Builds link list based on the currently active page
-local function page_links(pages, active, config)
+local function page_links(pages, active)
     local output = ''
 
     for k, page in pairs(pages) do
@@ -71,6 +71,50 @@ local function page_links(pages, active, config)
     return output
 end
 
+
+---
+-- Process calls to plugins: $! plugin arg, arg... !$
+--
+-- @param s  Content string
+-- @param out  Table describing the page or post
+-- @param file  Name and path of the input file
+-- @result  Processed string
+--
+local function process_plugins(s, out, file)
+    local pos = 1
+    while pos < #s do
+	local a, b = s:find('%$!.-!%$', pos)
+	if not a then break end
+	local s2 = s:sub(a + 2, b - 2)
+	local pl, arg = s2:match('^ *(%w+) *(.*)$')
+	if not pl then
+	    error('Empty plugin call in ' .. file)
+	end
+
+	-- convert args to a table
+	if #arg > 0 then
+	    arg = loadstring("return { " .. arg .. "}")()
+	else
+	    arg = {}
+	end
+
+	-- load the plugin either from the site directory or the install directory
+	local path = 'plugins/' .. pl
+	if not lfs.attributes(path .. '/init.lua', "mode") then
+	    path = config.base .. '/plugins/' .. pl
+	end
+
+	local plugin = loadfile(path .. '/init.lua')()
+
+	-- execute the plugin, replace markup by result
+	arg.plugin_path = path
+	local res = plugin(out, arg)
+	s = s:sub(1, a - 1) .. res .. s:sub(b + 1)
+	pos = a + #res
+    end
+
+    return s
+end
 
 ---
 -- Load all markdown files in a directory and preprocess them
@@ -120,38 +164,7 @@ local function load_markdowns(directory, template)
                 s = s:gsub('%$[%w]+=.-\n', '')
             end
 
-	    -- Process calls to plugins: $! plugin arg, arg... !$
-	    local pos = 1
-	    while pos < #s do
-		local a, b = s:find('%$!.-!%$', pos)
-		if not a then break end
-		local s2 = s:sub(a + 2, b - 2)
-		local pl, arg = s2:match('^ *(%w+) *(.*)$')
-		if not pl then
-		    error('Empty plugin call in ' .. file)
-		end
-
-		-- convert args to a table
-		if #arg > 0 then
-		    arg = loadstring("return { " .. arg .. "}")()
-		else
-		    arg = {}
-		end
-
-		-- load the plugin either from the site directory or the install directory
-		local path = 'plugins/' .. pl
-		if not lfs.attributes(path .. '/init.lua', "mode") then
-		    path = config.base .. '/plugins/' .. pl
-		end
-
-		local plugin = loadfile(path .. '/init.lua')()
-
-		-- execute the plugin, replace markup by result
-		arg.plugin_path = path
-		local res = plugin(out, arg)
-		s = s:sub(1, a - 1) .. res .. s:sub(b + 1)
-		pos = a + #res
-	    end
+	    s = process_plugins(s, out, file)
 
             -- Excerpt
             local start, _ = s:find('--MORE--')

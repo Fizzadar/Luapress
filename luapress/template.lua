@@ -37,15 +37,15 @@ end
 function template:process(...)
     local function process(code)
         -- Prepend bits
-        code = 'local self, output = require(\'luapress.template\'), "" output = output .. [[' .. code
+        code = 'local self, output = require(\'luapress.template\'), ""\noutput = output .. [[' .. code
         -- Replace <?=vars?>
         code = code:gsub('<%?=([,/_\'%[%]%%%:%.%a%s%(%)]+)%s%?>', ']] .. self:toString( %1 ) .. [[')
         -- Replace <? to close output, start raw lua
         code = code:gsub('<%?%s', ']] ')
         -- Replace ?> to stop lua and start output (in table)
-        code = code:gsub('%s%?>', ' output = output .. [[')
+        code = code:gsub('%s%?>', '\noutput = output .. [[')
         -- Close final output and return concat of the table
-        code = code .. ' \n]] return output'
+        code = code .. ' \n]]\nreturn output'
 
         return loadstring(code)()
     end

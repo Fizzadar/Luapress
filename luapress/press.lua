@@ -47,7 +47,8 @@ local function build()
             title = 'Archive',
             time = os.time(),
             content = template:process(templates.archive),
-	    template = 'post'
+	    template = 'page',
+	    directory = 'pages',
         })
     end
 
@@ -55,10 +56,10 @@ local function build()
     if config.print then print('[4] Building ' .. (config.cache and 'new ' or '') .. 'posts') end
     template:set('single', true)
     -- Page links shared between all posts
-    template:set('page_links', util.page_links(pages, nil, config))
+    template:set('page_links', util.page_links(pages, nil))
 
     for _, post in pairs(posts) do
-        local dest_file = util.ensure_destination('posts', post.link, config)
+        local dest_file = util.ensure_destination(post)
 
         -- Attach the post & output the file
         template:set('post', post)
@@ -71,10 +72,10 @@ local function build()
     template:set('have_posts', #posts > 0)
 
     for _, page in pairs(pages) do
-        local dest_file = util.ensure_destination('pages', page.link, config)
+        local dest_file = util.ensure_destination(page)
 
         -- We're a page, so change up page_links
-        template:set('page_links', util.page_links(pages, page.link, config))
+        template:set('page_links', util.page_links(pages, page.link))
         template:set('page', page)
 
         -- Output the file
@@ -85,7 +86,7 @@ local function build()
     -- Build the indexes
     if config.print then print('[6] Building index pages') end
     -- Page links shared between all indexes
-    template:set('page_links', util.page_links(pages, nil, config))
+    template:set('page_links', util.page_links(pages, nil))
 
     -- Iterate to generate indexes
     local index = 1
