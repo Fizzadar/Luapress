@@ -92,8 +92,8 @@ if err then
     os.exit(1)
 end
 
--- Load the local config file
-local config = require('config')
+-- Load the local config file into a global variable.
+config = require('config')
 
 -- Check/setup url
 config.url = arg[idn] or config.url
@@ -102,6 +102,8 @@ config.cache = opts.cache
 config.print = true
 config.build_dir = opts.build
 config.root = lfs.currentdir()
+-- location of the bin directory (probably /usr/local/lib/luarocks/rocks/luapress/*/)
+config.base = string.gsub(arg[0], "/[^/]-/[^/]-$", "")
 
 -- Read the "previous url" from the cache file
 local f, err = io.open('.luapress', 'r')
@@ -122,10 +124,10 @@ if f then
 end
 
 -- Ensure the build directory
-luapress.make_build(config)
+luapress.make_build()
 
 -- Build the blog
-local status, err = luapress.build(config)
+local status, err = luapress.build()
 if err then
     print(err)
     os.exit(1)

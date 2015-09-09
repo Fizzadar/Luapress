@@ -15,7 +15,7 @@ local util = require('luapress.util')
 local template = require('luapress.template')
 
 
-local function build(config)
+local function build()
     -- Setup our global template values
     template:set('title', config.title)
     template:set('url', config.url)
@@ -214,13 +214,12 @@ local function build(config)
 end
 
 
-local function make_build(config)
-    -- Make main directory
-    lfs.mkdir(config.root .. '/' .. config.build_dir)
-
-    -- Make sub directories
+---
+-- Prepare the build directory with required subdirectories
+--
+local function make_build()
     for _, sub_directory in ipairs({
-        'posts', 'pages', 'inc', 'inc/template'
+        '', 'posts', 'pages', 'inc', 'inc/template'
     }) do
         lfs.mkdir(config.root .. '/' .. config.build_dir
 		.. '/' .. sub_directory)
@@ -237,21 +236,14 @@ end
 local function make_skeleton(root, url)
     -- Make directories
     for _, directory in ipairs({
-        '', 'posts', 'pages', 'inc',
-        'templates', 'templates/default', 'templates/default/inc'
+        '', 'posts', 'pages', 'inc', 'templates', 'templates/default',
     }) do
         lfs.mkdir(root .. '/' .. directory)
     end
 
-    -- Copy/write the default template
-    local templates = require('luapress.default_template')
-    for file, contents in pairs(templates) do
-        local f, err = io.open(root .. '/templates/default/' .. file, 'w')
-        if err then return false, err end
-        local status, err = f:write(contents)
-        if err then return false, err end
-        f:close()
-    end
+    -- Copy the default template
+    local base = string.gsub(arg[0], "/[^/]-/[^/]-$", "")
+    util.copy_dir(base .. '/template/', root .. '/templates/default/')
 
     -- Basic config template
     local config_code = [[

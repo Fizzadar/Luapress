@@ -39,7 +39,7 @@ local function _file_copy(from, to)
 	return
     end
 
-    print("Copying " .. from)
+    if config.print then print("Copying " .. from) end
 
     f_from = io.open(from, "rb")
     assert(f_from)
@@ -66,7 +66,7 @@ end
 
 
 
-local function process(page, config, arg)
+local function process(page, arg)
 
     -- determine the image directory, verify that it exists
     local dir = arg.dir or page.name
@@ -128,7 +128,7 @@ local function process(page, config, arg)
     -- generate HTMLs
     for i, img in ipairs(images) do
 	local html = io.open(img.html, "w")
-	local f = assert(io.open('plugins/gallery/gallery.lhtml'))
+	local f = assert(io.open(arg.plugin_path .. '/gallery.lhtml'))
 	local template = f:read("*a")
 	f:close()
 
@@ -153,7 +153,7 @@ local function process(page, config, arg)
     end
 
     -- copy style.css
-    _file_copy('plugins/gallery/gallery.css',
+    _file_copy(arg.plugin_path .. '/gallery.css',
 	config.build_dir .. '/inc/gallery.css')
 
     -- build index (HTML code that replaces the plugin call)

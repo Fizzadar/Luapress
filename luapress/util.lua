@@ -126,11 +126,17 @@ local function load_markdowns(directory, config)
 		    arg = {}
 		end
 
-		-- load the plugin.  For now only in the per-site directory.
-		local plugin = require('plugins/' .. pl .. '/init')
+		-- load the plugin either from the site directory or the install directory
+		local path = 'plugins/' .. pl
+		if not lfs.attributes(path .. '/init.lua', "mode") then
+		    path = config.base .. '/plugins/' .. pl
+		end
+
+		local plugin = loadfile(path .. '/init.lua')()
 
 		-- execute the plugin, replace markup by result
-		local res = plugin(out, config, arg)
+		arg.plugin_path = path
+		local res = plugin(out, arg)
 		s = s:sub(1, a - 1) .. res .. s:sub(b + 1)
 		pos = a + #res
 	    end
@@ -214,6 +220,7 @@ local function copy_dir(directory, destination)
 
                     -- Open new file for creation
                     local f, err = io.open(destination .. file, 'w')
+		    assert(f, "Failed to write to " .. destination .. file)
                     -- Write contents
                     local result, err = f:write(s)
                     if not result then error(err) end
