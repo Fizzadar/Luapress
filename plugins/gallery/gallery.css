@@ -1,4 +1,4 @@
-div { font-size:0; position:relative; background-color:#f00; }
+div { font-size:0; position:relative; }
 img { width:100%; height:auto; }
 .lr { font:10rem/0 sans-serif;
   position:absolute; top:0; bottom:0; z-index:1000;

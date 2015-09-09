@@ -37,9 +37,9 @@ end
 
 
 -- Returns the destination file given our config
-local function ensure_destination(directory, object_type, link, config)
+local function ensure_destination(object_type, link, config)
     if config.link_dirs then
-        lfs.mkdir(directory .. '/' .. config.build_dir .. '/' .. object_type .. '/' .. link)
+        lfs.mkdir(config.root .. '/' .. config.build_dir .. '/' .. object_type .. '/' .. link)
         return config.build_dir .. '/' .. object_type .. '/' .. link .. '/index.html'
     end
 
@@ -180,27 +180,6 @@ local function load_templates(directory)
             templates[tmpl_name] = s
         end
     end
-
-    -- RSS template
-    templates.rss = {
-        time = 0,
-        content = [[
-<?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0">
-    <channel>
-        <title><?=self:get('title') ?></title>
-        <link><?=self:get('url') ?></link>
-<? for k, post in pairs(self:get('posts')) do ?>
-        <item>
-            <title><?=post.title ?></title>
-            <description><? if post.excerpt then ?><?=post.excerpt ?><? else ?><?=post.content ?><? end ?></description>
-            <link><?=self:get('url') ?>/posts/<?=post.link ?></link>
-            <guid><?=self:get('url') ?>/posts/<?=post.link ?></guid>
-        </item>
-<? end ?>
-    </channel>
-</rss>
-    ]]}
 
     return templates
 end

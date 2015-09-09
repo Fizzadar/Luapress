@@ -60,7 +60,7 @@ local function build(config)
     template:set('page_links', util.page_links(pages, nil, config))
 
     for _, post in pairs(posts) do
-        local dest_file = util.ensure_destination(config.root, 'posts', post.link, config)
+        local dest_file = util.ensure_destination('posts', post.link, config)
 
         -- Attach the post & output the file
         template:set('post', post)
@@ -73,7 +73,7 @@ local function build(config)
     template:set('have_posts', #posts > 0)
 
     for _, page in pairs(pages) do
-        local dest_file = util.ensure_destination(config.root, 'pages', page.link, config)
+        local dest_file = util.ensure_destination('pages', page.link, config)
 
         -- We're a page, so change up page_links
         template:set('page_links', util.page_links(pages, page.link, config))
@@ -194,7 +194,7 @@ local function build(config)
 	end
 	if #rssposts > 0 then
 	    template:set('posts', rssposts)
-	    local rss = template:process(templates.rss.content)
+	    local rss = template:process(templates.rss)
 	    local f, err = io.open(config.root .. '/' .. config.build_dir .. '/index.xml', 'w')
 	    if not f then error(err) end
 	    local result, err = f:write(rss)
@@ -228,10 +228,16 @@ local function make_build(config)
 end
 
 
+---
+-- Create a new site
+--
+-- @param root  directory where to set up the files
+-- @param url  relative URL of the site, i.e. https://host.com/URL
+--
 local function make_skeleton(root, url)
     -- Make directories
     for _, directory in ipairs({
-        'posts', 'pages', 'inc',
+        '', 'posts', 'pages', 'inc',
         'templates', 'templates/default', 'templates/default/inc'
     }) do
         lfs.mkdir(root .. '/' .. directory)
