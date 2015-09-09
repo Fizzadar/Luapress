@@ -129,37 +129,35 @@ local function load_markdowns(directory, template)
 
     for file in lfs.dir(config.root .. "/" .. directory) do
         if file:sub(-3) == '.md' then
-            local title = file:sub(0, -4)
+            local fname = file:sub(0, -4)
             local file2 = config.root .. "/" .. directory .. '/' .. file
             local attributes = lfs.attributes(file2)
 
             -- Work out title
-            local link = title:gsub(' ', '_'):gsub('[^_aA-zZ0-9]', '')
+            local link = fname:gsub(' ', '_'):gsub('[^_aA-zZ0-9]', '')
             if not config.link_dirs then link = link .. '.html' end
 
             -- Get basic attributes
             local item = {
-		source = directory .. '/' .. file,
-                link = link,
-                title = title,
-		directory = directory,	-- relative to config.root
-		name = title,	-- same as title, but is not overwritten
+		source = directory .. '/' .. file,	-- for error messages
+                link = link,				-- basename of output file
+		name = fname,				-- same as title, but is not overwritten
+                title = fname,				-- displayed page name
+		directory = directory,			-- relative to config.root
                 content = '',
-                time = attributes.modification,
+                time = attributes.modification,		-- to check build requirement
                 modification = attributes.modification, -- stored separately as time can be overwritten w/$time=
-		template = template,
+		template = template,			-- what template will be used (type of item)
             }
 
             -- Now read the file
-            local f, err = io.open(file2, 'r')
-            if not f then error(err) end
-            local s, err = f:read('*a')
-            if not s then error(err) end
+            local f = assert(io.open(file2, 'r'))
+            local s = assert(f:read('*a'))
 
             -- Set $=key's
             s = s:gsub('%$=url', config.url)
 
-            -- Get $key=value's
+            -- Get $key=value's (and remove from string)
             for k, v in s:gmatch('%$([%w]+)=(.-)\n') do
                 item[k] = v
             end
@@ -168,7 +166,7 @@ local function load_markdowns(directory, template)
 	    s = process_plugins(s, item)
 
             -- Excerpt
-            local start, _ = s:find('--MORE--')
+            local start, _ = s:find('--MORE--', 1, true)
             if start then
                 -- Extract the excerpt
                 item.excerpt = markdown(s:sub(0, start - 1))
