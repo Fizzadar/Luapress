@@ -20,28 +20,25 @@ local function build()
     template:set('title', config.title)
     template:set('url', config.url)
 
-    -- Load the relevant template files
+    -- Load template files
     if config.print then print('[1] Loading templates') end
-    local templates = util.load_templates(config.root
-    	.. '/templates/' .. config.template)
+    local templates = util.load_templates()
 
-    -- Load the posts
+    -- Load the posts and sort by timestamp
     if config.print then print('[2] Loading posts') end
-    local posts = util.load_markdowns('posts', config)
-    -- Sort by time
+    local posts = util.load_markdowns('posts', 'post')
     table.sort(posts, function(a, b)
         return tonumber(a.time) > tonumber(b.time)
     end)
 
-    -- Load the pages
+    -- Load the pages and sort by order
     if config.print then print('[3] Loading pages') end
-    local pages = util.load_markdowns('pages', config)
-    -- Sort by order
+    local pages = util.load_markdowns('pages', 'page')
     table.sort(pages, function(a, b)
         return (tonumber(a.order) or 0) < (tonumber(b.order) or 0)
     end)
 
-    -- Build the archive page (all posts)
+    -- Build the archive page (all posts) if at least one post exists
     if #posts > 0 then
         template:set('posts', posts)
         template:set('page', {title = 'Archive'})
@@ -49,7 +46,8 @@ local function build()
             link = 'Archive' .. (config.link_dirs and '' or '.html'),
             title = 'Archive',
             time = os.time(),
-            content = template:process(templates.archive)
+            content = template:process(templates.archive),
+	    template = 'post'
         })
     end
 
@@ -64,7 +62,7 @@ local function build()
 
         -- Attach the post & output the file
         template:set('post', post)
-        util.write_html(dest_file, post, 'post', templates, config)
+        util.write_html(dest_file, post, templates)
     end
 
     -- Build the pages
@@ -80,7 +78,7 @@ local function build()
         template:set('page', page)
 
         -- Output the file
-        util.write_html(dest_file, page, 'page', templates, config)
+        util.write_html(dest_file, page, templates)
     end
     template:set('page', false)
 

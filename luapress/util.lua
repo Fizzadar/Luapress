@@ -16,23 +16,30 @@ local markdown = require('luapress.lib.markdown')
 local template = require('luapress.template')
 
 
+---
 -- Writes a header/footer wrapped HTML file depending on the modification time
-local function write_html(destination, object, object_type, templates, config)
-    -- Check modification time on post & destination files
+--
+-- @param destination  Path and name of the output file
+-- @param object  Descriptor of page or post
+-- @param templates  Table with templates.
+--
+local function write_html(destination, object, templates)
+
+    -- If the output file exists and is not older than the input file, skip.
     local attributes = lfs.attributes(destination)
-
-    if not (config.cache and attributes and object.modification) or object.modification > attributes.modification then
-        local output = template:process(templates.header, templates[object_type], templates.footer)
-
-        -- Write the file
-        f, err = io.open(destination, 'w')
-        if not f then error(err) end
-        local result, err = f:write(output)
-        if not result then error(err) end
-        f:close()
-
-        if config.print then print('\t' .. object.title) end
+    if config.cache and attributes and object.modification and object.modification <= attributes.modification then
+	return
     end
+
+    -- Write the file
+    if config.print then print('\t' .. object.title) end
+    local output = template:process(templates.header, templates[object.template], templates.footer)
+    f, err = io.open(destination, 'w')
+    if not f then error(err) end
+    local result, err = f:write(output)
+    if not result then error(err) end
+    f:close()
+
 end
 
 
@@ -66,10 +73,14 @@ end
 
 
 ---
--- Load markdown files in a directory
--- @param directory  Subdirectory of config.root
+-- Load all markdown files in a directory and preprocess them
+-- into HTML.
 --
-local function load_markdowns(directory, config)
+-- @param directory  Subdirectory of config.root (pages or posts)
+-- @param template  'page' or 'post'
+-- @return  Table of items
+--
+local function load_markdowns(directory, template)
     local outs = {}
 
     for file in lfs.dir(config.root .. "/" .. directory) do
@@ -90,7 +101,8 @@ local function load_markdowns(directory, config)
 		name = title,	-- same as title, but is not overwritten
                 content = '',
                 time = attributes.modification,
-                modification = attributes.modification -- stored separately as time can be overwritten w/$time=
+                modification = attributes.modification, -- stored separately as time can be overwritten w/$time=
+		template = template,
             }
 
             -- Now read the file
@@ -169,9 +181,12 @@ local function load_markdowns(directory, config)
 end
 
 
--- Loads lhtml templates in a directory
-local function load_templates(directory)
+---
+-- Loads all .lhtml files from a template directory
+--
+local function load_templates()
     local templates = {}
+    local directory = config.root .. '/templates/' .. config.template
 
     for file in lfs.dir(directory) do
         if file:sub(-5) == 'lhtml' then
