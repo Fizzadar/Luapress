@@ -77,10 +77,9 @@ end
 --
 -- @param s  Content string
 -- @param out  Table describing the page or post
--- @param file  Name and path of the input file
 -- @result  Processed string
 --
-local function process_plugins(s, out, file)
+local function process_plugins(s, out)
     local pos = 1
     while pos < #s do
 	local a, b = s:find('%$!.-!%$', pos)
@@ -88,7 +87,7 @@ local function process_plugins(s, out, file)
 	local s2 = s:sub(a + 2, b - 2)
 	local pl, arg = s2:match('^ *(%w+) *(.*)$')
 	if not pl then
-	    error('Empty plugin call in ' .. file)
+	    error('Empty plugin call in ' .. out.source)
 	end
 
 	-- convert args to a table
@@ -116,6 +115,7 @@ local function process_plugins(s, out, file)
     return s
 end
 
+
 ---
 -- Load all markdown files in a directory and preprocess them
 -- into HTML.
@@ -125,20 +125,21 @@ end
 -- @return  Table of items
 --
 local function load_markdowns(directory, template)
-    local outs = {}
+    local items = {}
 
     for file in lfs.dir(config.root .. "/" .. directory) do
         if file:sub(-3) == '.md' then
             local title = file:sub(0, -4)
-            file = config.root .. "/" .. directory .. '/' .. file
-            local attributes = lfs.attributes(file)
+            local file2 = config.root .. "/" .. directory .. '/' .. file
+            local attributes = lfs.attributes(file2)
 
             -- Work out title
             local link = title:gsub(' ', '_'):gsub('[^_aA-zZ0-9]', '')
             if not config.link_dirs then link = link .. '.html' end
 
             -- Get basic attributes
-            local out = {
+            local item = {
+		source = directory .. '/' .. file,
                 link = link,
                 title = title,
 		directory = directory,	-- relative to config.root
@@ -150,7 +151,7 @@ local function load_markdowns(directory, template)
             }
 
             -- Now read the file
-            local f, err = io.open(file, 'r')
+            local f, err = io.open(file2, 'r')
             if not f then error(err) end
             local s, err = f:read('*a')
             if not s then error(err) end
@@ -159,38 +160,38 @@ local function load_markdowns(directory, template)
             s = s:gsub('%$=url', config.url)
 
             -- Get $key=value's
-            for k, v, c, d in s:gmatch('%$([%w]+)=(.-)\n') do
-                out[k] = v
-                s = s:gsub('%$[%w]+=.-\n', '')
+            for k, v in s:gmatch('%$([%w]+)=(.-)\n') do
+                item[k] = v
             end
+	    s = s:gsub('%$[%w]+=.-\n', '')
 
-	    s = process_plugins(s, out, file)
+	    s = process_plugins(s, item)
 
             -- Excerpt
             local start, _ = s:find('--MORE--')
             if start then
                 -- Extract the excerpt
-                out.excerpt = markdown(s:sub(0, start - 1))
+                item.excerpt = markdown(s:sub(0, start - 1))
                 -- Replace the --MORE--
                 local sep = config.more_separator or ''
                 s = s:gsub('%-%-MORE%-%-', '<a id="more">' .. sep .. '</a>')
             end
 
-            out.content = markdown(s)
+            item.content = markdown(s)
 
             -- Date set?
-            if out.date then
-                local _, _, d, m, y = out.date:find('(%d+)%/(%d+)%/(%d+)')
-                out.time = os.time({day = d, month = m, year = y})
+            if item.date then
+                local _, _, d, m, y = item.date:find('(%d+)%/(%d+)%/(%d+)')
+                item.time = os.time({day = d, month = m, year = y})
             end
 
-            -- Insert to outs
-            table.insert(outs, out)
-            if config.print then print('\t' .. out.title) end
+            -- Insert to items
+	    items[#items + 1] = item
+            if config.print then print('\t' .. item.title) end
         end
     end
 
-    return outs
+    return items
 end
 
 
@@ -261,6 +262,63 @@ local function copy_dir(directory, destination)
     end
 end
 
+local function process_xref_1(fname, s, idx)
+    local pos = 1
+
+    while pos < #s do
+	local a, b = s:find('%[=(.-)%]', pos)
+	if not a then break end
+	local ref = s:sub(a + 2, b - 1)
+	local res = idx[ref]
+	if not res then
+	    print(string.format("%s: Error: cross reference to %s not found.",
+		fname, ref))
+	    res = "INVALID XREF"
+	else
+	    res = string.format('<a href="%s/%s/%s">%s</a>',
+		config.url, res.directory, res.link, res.title)
+	end
+
+	s = s:sub(1, a - 1) .. res .. s:sub(b + 1)
+	pos = a + #res
+    end
+
+    return s
+end
+
+
+---
+-- Replace all cross references by proper hyperlinks.  An xref has this format:
+-- [=TYPE/NAME], where TYPE is either page or post, and NAME is the file name
+-- (without the .md suffix).  The link text is the title of the target
+-- page.
+-- 
+-- @param pages  Array of all pages
+-- @param posts  Array of all posts
+--
+local function process_xref(pages, posts)
+
+    -- create an index (name to item)
+    local idx = {}
+    for _, item in ipairs(pages) do
+	idx['pages/' .. item.name] = item
+    end
+    for _, item in ipairs(posts) do
+	idx['posts/' .. item.name] = item
+    end
+
+    -- check all items for xrefs
+    for _, item in ipairs(pages) do
+	item.content = process_xref_1(item.source, item.content, idx)
+	if item.excerpt then
+	    item.excerpt = process_xref_1(item.source, item.excerpt, idx)
+	end
+    end
+    for _, item in ipairs(posts) do
+	item.content = process_xref_1(item.source, item.content, idx)
+    end
+
+end
 
 -- Export
 return {
@@ -269,5 +327,6 @@ return {
     load_markdowns = load_markdowns,
     page_links = page_links,
     ensure_destination = ensure_destination,
-    write_html = write_html
+    write_html = write_html,
+    process_xref = process_xref,
 }

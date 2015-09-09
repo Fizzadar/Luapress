@@ -49,8 +49,12 @@ local function build()
             content = template:process(templates.archive),
 	    template = 'page',
 	    directory = 'pages',
+	    name = 'archive',
         })
     end
+
+    -- Process cross references
+    util.process_xref(pages, posts)
 
     -- Build the posts
     if config.print then print('[4] Building ' .. (config.cache and 'new ' or '') .. 'posts') end
