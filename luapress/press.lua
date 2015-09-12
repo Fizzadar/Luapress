@@ -97,8 +97,14 @@ local function build_index(pages, posts, templates)
 	-- The "copy file" part of util.copy_dir could be refactored into
 	-- a separate function and used here.
 	if idxpage then
+        -- Work out built file location
 	    local bdir = config.root .. '/' .. config.build_dir .. '/'
-	    local f, err = io.open(bdir .. "pages/" .. idxpage.name .. ".html")
+        local filename = bdir .. "pages/" .. idxpage.link
+        if config.link_dirs then
+            filename = filename .. '/index.html'
+        end
+
+	    local f, err = io.open(filename)
 	    if not f then error(err) end
 	    local s, err = f:read('*a')
 	    if not s then error(err) end
@@ -117,21 +123,22 @@ end
 -- If any posts are available, build a RSS file
 --
 local function build_rss(posts, templates)
-
     if #posts == 0 then return end
 
     if config.print then print('[7] Building RSS') end
     local rssposts = {}
 
     for k, post in ipairs(posts) do
-	if k > 10 then
-	    break
-	end
-	if post.excerpt then
-	    post.excerpt = post.excerpt:gsub('<[^>]+/?>', ' '):gsub('</[^>]+>', ' '):gsub('\n', '')
-	end
-	post.title = post.title:gsub('%p', '')
-	rssposts[#rssposts + 1] = post
+    	if k > 10 then
+    	    break
+    	end
+
+    	if post.excerpt then
+    	    post.excerpt = post.excerpt:gsub('<[^>]+/?>', ' '):gsub('</[^>]+>', ' '):gsub('\n', '')
+    	end
+
+    	post.title = post.title:gsub('%p', '')
+    	rssposts[#rssposts + 1] = post
     end
 
     template:set('posts', rssposts)
