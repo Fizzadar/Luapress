@@ -34,6 +34,7 @@ Usage:
 + Hide pages from the link list with `$hidden=true`
 + Add `--nocache` before the URL to ignore caching (for template dev)
 + Put `--MORE--` inside a post file to generate a excerpt/read-more link
++ Use `[=pages|posts/NAME]` to crosslink between pages
 
 ## Example
 
