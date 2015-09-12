@@ -20,7 +20,6 @@ local template = require('luapress.template')
 -- one of the pages if no posts are available.
 --
 local function build_index(pages, posts, templates)
-
     local index = 1
     local count = 0
     local output = ''
@@ -80,41 +79,32 @@ local function build_index(pages, posts, templates)
 
     -- No posts at all, but at least one page?  Have an index.html anyway.
     if #posts == 0 and #pages > 0 then
-	local idxpage
-	if config.index then
-	    -- use specified page
-	    for _, page in ipairs(pages) do
-		if page.name == config.index then
-		    idxpage = page
-		    break
-		end
-	    end
-	else
-	    -- use first page
-	    idxpage = pages[1]
-	end
+    local idxpage
+    if config.index then
+        -- use specified page
+        for _, page in ipairs(pages) do
+        if page.name == config.index then
+            idxpage = page
+            break
+        end
+        end
+    else
+        -- use first page
+        idxpage = pages[1]
+    end
 
-	-- The "copy file" part of util.copy_dir could be refactored into
-	-- a separate function and used here.
-	if idxpage then
+    -- The "copy file" part of util.copy_dir could be refactored into
+    -- a separate function and used here.
+    if idxpage then
         -- Work out built file location
-	    local bdir = config.root .. '/' .. config.build_dir .. '/'
+        local bdir = config.root .. '/' .. config.build_dir .. '/'
         local filename = bdir .. "pages/" .. idxpage.link
         if config.link_dirs then
             filename = filename .. '/index.html'
         end
 
-	    local f, err = io.open(filename)
-	    if not f then error(err) end
-	    local s, err = f:read('*a')
-	    if not s then error(err) end
-	    f:close()
-
-	    f, err = io.open(bdir .. "index.html", "w")
-	    if not f then error(err) end
-	    f:write(s)
-	    f:close()
-	end
+        util.copy_file(filename, bdir .. 'index.html')
+    end
     end
 end
 
@@ -123,22 +113,24 @@ end
 -- If any posts are available, build a RSS file
 --
 local function build_rss(posts, templates)
-    if #posts == 0 then return end
+    if #posts == 0 then
+        return
+    end
 
     if config.print then print('[7] Building RSS') end
     local rssposts = {}
 
     for k, post in ipairs(posts) do
-    	if k > 10 then
-    	    break
-    	end
+        if k > 10 then
+            break
+        end
 
-    	if post.excerpt then
-    	    post.excerpt = post.excerpt:gsub('<[^>]+/?>', ' '):gsub('</[^>]+>', ' '):gsub('\n', '')
-    	end
+        if post.excerpt then
+            post.excerpt = post.excerpt:gsub('<[^>]+/?>', ' '):gsub('</[^>]+>', ' '):gsub('\n', '')
+        end
 
-    	post.title = post.title:gsub('%p', '')
-    	rssposts[#rssposts + 1] = post
+        post.title = post.title:gsub('%p', '')
+        rssposts[#rssposts + 1] = post
     end
 
     template:set('posts', rssposts)
@@ -155,7 +147,6 @@ end
 -- This is the main function to generate the static website.
 --
 local function build()
-
     -- Setup our global template values
     template:set('title', config.title)
     template:set('url', config.url)
@@ -187,14 +178,17 @@ local function build()
             title = 'Archive',
             time = os.time(),
             content = template:process(templates.archive),
-	    template = 'page',
-	    directory = 'pages',
-	    name = 'archive',
+            template = 'page',
+            directory = 'pages',
+            name = 'archive',
         })
     end
 
     -- Process cross references
     util.process_xref(pages, posts)
+
+    -- Tell the header template we have posts (ie show RSS)
+    template:set('have_posts', #posts > 0)
 
     -- Build the posts
     if config.print then print('[4] Building ' .. (config.cache and 'new ' or '') .. 'posts') end
@@ -213,7 +207,6 @@ local function build()
     -- Build the pages
     if config.print then print('[5] Building ' .. (config.cache and 'new ' or '') .. 'pages') end
     template:set('single', false)
-    template:set('have_posts', #posts > 0)
 
     for _, page in ipairs(pages) do
         local dest_file = util.ensure_destination(page)
@@ -258,7 +251,7 @@ local function make_build()
         '', 'posts', 'pages', 'inc', 'inc/template'
     }) do
         lfs.mkdir(config.root .. '/' .. config.build_dir
-		.. '/' .. sub_directory)
+        .. '/' .. sub_directory)
     end
 end
 
@@ -280,6 +273,12 @@ local function make_skeleton(root, url)
     -- Copy the default template
     local base = string.gsub(arg[0], "/[^/]-/[^/]-$", "")
     util.copy_dir(base .. '/template/', root .. '/templates/default/')
+
+    local attributes = lfs.attributes(root .. '/config.lua')
+    if attributes then
+        print('config.lua found, not writing new config...')
+        return
+    end
 
     -- Basic config template
     local config_code = [[

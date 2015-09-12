@@ -24,11 +24,10 @@ local template = require('luapress.template')
 -- @param templates  Table with templates.
 --
 local function write_html(destination, object, templates)
-
     -- If the output file exists and is not older than the input file, skip.
     local attributes = lfs.attributes(destination)
     if config.cache and attributes and object.modification and object.modification <= attributes.modification then
-	return
+    return
     end
 
     -- Write the file
@@ -82,34 +81,34 @@ end
 local function process_plugins(s, out)
     local pos = 1
     while pos < #s do
-	local a, b = s:find('%$!.-!%$', pos)
-	if not a then break end
-	local s2 = s:sub(a + 2, b - 2)
-	local pl, arg = s2:match('^ *(%w+) *(.*)$')
-	if not pl then
-	    error('Empty plugin call in ' .. out.source)
-	end
+    local a, b = s:find('%$!.-!%$', pos)
+    if not a then break end
+    local s2 = s:sub(a + 2, b - 2)
+    local pl, arg = s2:match('^ *(%w+) *(.*)$')
+    if not pl then
+        error('Empty plugin call in ' .. out.source)
+    end
 
-	-- convert args to a table
-	if #arg > 0 then
-	    arg = loadstring("return { " .. arg .. "}")()
-	else
-	    arg = {}
-	end
+    -- convert args to a table
+    if #arg > 0 then
+        arg = loadstring("return { " .. arg .. "}")()
+    else
+        arg = {}
+    end
 
-	-- load the plugin either from the site directory or the install directory
-	local path = 'plugins/' .. pl
-	if not lfs.attributes(path .. '/init.lua', "mode") then
-	    path = config.base .. '/plugins/' .. pl
-	end
+    -- load the plugin either from the site directory or the install directory
+    local path = 'plugins/' .. pl
+    if not lfs.attributes(path .. '/init.lua', "mode") then
+        path = config.base .. '/plugins/' .. pl
+    end
 
-	local plugin = loadfile(path .. '/init.lua')()
+    local plugin = loadfile(path .. '/init.lua')()
 
-	-- execute the plugin, replace markup by result
-	arg.plugin_path = path
-	local res = plugin(out, arg)
-	s = s:sub(1, a - 1) .. res .. s:sub(b + 1)
-	pos = a + #res
+    -- execute the plugin, replace markup by result
+    arg.plugin_path = path
+    local res = plugin(out, arg)
+    s = s:sub(1, a - 1) .. res .. s:sub(b + 1)
+    pos = a + #res
     end
 
     return s
@@ -133,21 +132,23 @@ local function load_markdowns(directory, template)
             local file2 = config.root .. "/" .. directory .. '/' .. file
             local attributes = lfs.attributes(file2)
 
-            -- Work out title
+            -- Work out link
             local link = fname:gsub(' ', '_'):gsub('[^_aA-zZ0-9]', '')
-            if not config.link_dirs then link = link .. '.html' end
+            if not config.link_dirs then
+                link = link .. '.html'
+            end
 
             -- Get basic attributes
             local item = {
-		source = directory .. '/' .. file,	-- for error messages
-                link = link,				-- basename of output file
-		name = fname,				-- same as title, but is not overwritten
-                title = fname,				-- displayed page name
-		directory = directory,			-- relative to config.root
+                source = directory .. '/' .. file, -- for error messages
+                link = link, -- basename of output file
+                name = fname, -- same as title, but is not overwritten
+                title = fname, -- displayed page name
+                directory = directory, -- relative to config.root
                 content = '',
-                time = attributes.modification,		-- to check build requirement
+                time = attributes.modification, -- to check build requirement
                 modification = attributes.modification, -- stored separately as time can be overwritten w/$time=
-		template = template,			-- what template will be used (type of item)
+                template = template, -- what template will be used (type of item)
             }
 
             -- Now read the file
@@ -161,9 +162,10 @@ local function load_markdowns(directory, template)
             for k, v in s:gmatch('%$([%w]+)=(.-)\n') do
                 item[k] = v
             end
-	    s = s:gsub('%$[%w]+=.-\n', '')
+            s = s:gsub('%$[%w]+=.-\n', '')
 
-	    s = process_plugins(s, item)
+            -- Hande plugins
+            s = process_plugins(s, item)
 
             -- Excerpt
             local start, _ = s:find('--MORE--', 1, true)
@@ -184,7 +186,7 @@ local function load_markdowns(directory, template)
             end
 
             -- Insert to items
-	    items[#items + 1] = item
+        items[#items + 1] = item
             if config.print then print('\t' .. item.title) end
         end
     end
@@ -218,7 +220,34 @@ local function load_templates()
 end
 
 
+---
+-- Copies a single file
+--
+local function copy_file(source, destination)
+    -- Open current file
+    local f, err = io.open(source, 'r')
+    if not f then error(err) end
+    -- Read file
+    local s, err = f:read('*a')
+    if not s then error(err) end
+    f:close()
+
+    -- Open new file for creation
+    local f, err = io.open(destination, 'w')
+    assert(f, "Failed to write to " .. destination)
+
+    -- Write contents
+    local result, err = f:write(s)
+    if not result then error(err) end
+    f:close()
+
+    print('\t' .. destination)
+end
+
+
+---
 -- Recursively duplicates a directory
+--
 local function copy_dir(directory, destination)
     for file in lfs.dir(directory) do
         if file ~= '.' and file ~= '..' then
@@ -237,60 +266,44 @@ local function copy_dir(directory, destination)
             if attributes.mode and attributes.mode == 'file' then
                 local dest_attributes = lfs.attributes(destination .. file)
                 if not dest_attributes or attributes.modification > dest_attributes.modification then
-                    -- Open current file
-                    local f, err = io.open(directory .. file, 'r')
-                    if not f then error(err) end
-                    -- Read file
-                    local s, err = f:read('*a')
-                    if not s then error(err) end
-                    f:close()
-
-                    -- Open new file for creation
-                    local f, err = io.open(destination .. file, 'w')
-		    assert(f, "Failed to write to " .. destination .. file)
-                    -- Write contents
-                    local result, err = f:write(s)
-                    if not result then error(err) end
-                    f:close()
-
-                    print('\t' .. destination .. file)
+                    copy_file(directory .. file, destination .. file)
                 end
             end
         end
     end
 end
 
+
 local function process_xref_1(fname, s, idx)
     local pos = 1
 
     while pos < #s do
-	local a, b = s:find('%[=(.-)%]', pos)
-	if not a then break end
-	local ref = s:sub(a + 2, b - 1)
-	local res = idx[ref]
-	if not res then
-	    print(string.format("%s: Error: cross reference to %s not found.",
-		fname, ref))
-	    res = "INVALID XREF"
-	else
-	    res = string.format('<a href="%s/%s/%s">%s</a>',
-		config.url, res.directory, res.link, res.title)
-	end
+    local a, b = s:find('%[=(.-)%]', pos)
+    if not a then break end
+    local ref = s:sub(a + 2, b - 1)
+    local res = idx[ref]
+    if not res then
+        print(string.format("%s: Error: cross reference to %s not found.",
+        fname, ref))
+        res = "INVALID XREF"
+    else
+        res = string.format('<a href="%s/%s/%s">%s</a>',
+        config.url, res.directory, res.link, res.title)
+    end
 
-	s = s:sub(1, a - 1) .. res .. s:sub(b + 1)
-	pos = a + #res
+    s = s:sub(1, a - 1) .. res .. s:sub(b + 1)
+    pos = a + #res
     end
 
     return s
 end
-
 
 ---
 -- Replace all cross references by proper hyperlinks.  An xref has this format:
 -- [=TYPE/NAME], where TYPE is either page or post, and NAME is the file name
 -- (without the .md suffix).  The link text is the title of the target
 -- page.
--- 
+--
 -- @param pages  Array of all pages
 -- @param posts  Array of all posts
 --
@@ -299,27 +312,28 @@ local function process_xref(pages, posts)
     -- create an index (name to item)
     local idx = {}
     for _, item in ipairs(pages) do
-	idx['pages/' .. item.name] = item
+    idx['pages/' .. item.name] = item
     end
     for _, item in ipairs(posts) do
-	idx['posts/' .. item.name] = item
+    idx['posts/' .. item.name] = item
     end
 
     -- check all items for xrefs
     for _, item in ipairs(pages) do
-	item.content = process_xref_1(item.source, item.content, idx)
-	if item.excerpt then
-	    item.excerpt = process_xref_1(item.source, item.excerpt, idx)
-	end
+    item.content = process_xref_1(item.source, item.content, idx)
+    if item.excerpt then
+        item.excerpt = process_xref_1(item.source, item.excerpt, idx)
+    end
     end
     for _, item in ipairs(posts) do
-	item.content = process_xref_1(item.source, item.content, idx)
+    item.content = process_xref_1(item.source, item.content, idx)
     end
 
 end
 
 -- Export
 return {
+    copy_file = copy_file,
     copy_dir = copy_dir,
     load_templates = load_templates,
     load_markdowns = load_markdowns,
