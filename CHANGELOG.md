@@ -1,3 +1,13 @@
+# 2.1.0
+
+Many thanks to GitHub user w-oertl for contributing most of this release.
+
++ Add crosslink capability [posts|pages/NAME]
++ If no posts and pages, use first post as index, or link.index
++ Plugin support(!) & gallery plugin
++ Move default template into install path and copy on init
++ Add tests
+
 # v2.0.4
 
 + Add `--build` option to change the directory to build the blog in
