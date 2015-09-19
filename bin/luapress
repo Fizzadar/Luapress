@@ -105,6 +105,10 @@ config.root = lfs.currentdir()
 -- location of the bin directory (probably /usr/local/lib/luarocks/rocks/luapress/*/)
 config.base = string.gsub(arg[0], "/[^/]-/[^/]-$", "")
 
+-- Config defaults
+config.posts_dir = config.posts_dir or 'posts'
+config.pages_dir = config.pages_dir or 'pages'
+
 -- Read the "previous url" from the cache file
 local f, err = io.open('.luapress', 'r')
 if f then

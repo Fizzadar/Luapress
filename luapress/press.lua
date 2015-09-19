@@ -150,6 +150,7 @@ local function build()
     -- Setup our global template values
     template:set('title', config.title)
     template:set('url', config.url)
+    template:set('config', config)
 
     -- Load template files
     if config.print then print('[1] Loading templates') end
@@ -179,7 +180,7 @@ local function build()
             time = os.time(),
             content = template:process(templates.archive),
             template = 'page',
-            directory = 'pages',
+            directory = config.pages_dir,
             name = 'archive',
         })
     end
@@ -248,10 +249,9 @@ end
 --
 local function make_build()
     for _, sub_directory in ipairs({
-        '', 'posts', 'pages', 'inc', 'inc/template'
+        '', config.posts_dir, config.pages_dir, 'inc', 'inc/template'
     }) do
-        lfs.mkdir(config.root .. '/' .. config.build_dir
-        .. '/' .. sub_directory)
+        lfs.mkdir(config.root .. '/' .. config.build_dir.. '/' .. sub_directory)
     end
 end
 
@@ -294,6 +294,9 @@ local config = {
     posts_per_page = 2,
     -- Link directories not files
     link_dirs = true,
+    -- Control the output directories for posts & pages
+    pages_dir = nil,
+    posts_dir = nil,
     -- Separator to put inside <a id="more"></a> link
     more_separator = '',
     -- Select a page as the landing page (optional, no path or suffix)

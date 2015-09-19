@@ -60,9 +60,9 @@ local function page_links(pages, active)
     for k, page in pairs(pages) do
         if not page.hidden then
             if page.link == active then
-                output = output .. '<li class="active"><a href="' .. config.url .. '/pages/' .. active .. '">' .. page.title .. '</a></li>\n'
+                output = output .. '<li class="active"><a href="' .. config.url .. '/' .. config.pages_dir .. '/' .. active .. '">' .. page.title .. '</a></li>\n'
             else
-                output = output .. '<li><a href="' .. config.url .. '/pages/' .. page.link .. '">' .. page.title .. '</a></li>\n'
+                output = output .. '<li><a href="' .. config.url .. '/' .. config.pages_dir .. '/' .. page.link .. '">' .. page.title .. '</a></li>\n'
             end
         end
     end
@@ -125,6 +125,7 @@ end
 --
 local function load_markdowns(directory, template)
     local items = {}
+    local out_directory = config[directory .. '_dir']
 
     for file in lfs.dir(config.root .. "/" .. directory) do
         if file:sub(-3) == '.md' then
@@ -144,7 +145,7 @@ local function load_markdowns(directory, template)
                 link = link, -- basename of output file
                 name = fname, -- same as title, but is not overwritten
                 title = fname, -- displayed page name
-                directory = directory, -- relative to config.root
+                directory = out_directory, -- relative to config.root
                 content = '',
                 time = attributes.modification, -- to check build requirement
                 modification = attributes.modification, -- stored separately as time can be overwritten w/$time=

@@ -1,6 +1,6 @@
 <div class="post">
     <h2><? if self:get('single') then ?><?=self:get('post').title ?><? else ?>
-        <a href="<?=self:get('url') ?>/posts/<?=self:get('post').link ?>"><?=self:get('post').title ?></a>
+        <a href="<?=self:get('url') ?>/<?=self:get('config').posts_dir ?>/<?=self:get('post').link ?>"><?=self:get('post').title ?></a>
     <? end ?></h2>
     <div class="content"><?=self:get('post').content ?></div>
     <div class="meta"><?=os.date('%a, %d %B, %Y', self:get('post').time) ?></div>
