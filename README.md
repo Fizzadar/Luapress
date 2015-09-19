@@ -37,6 +37,7 @@ Usage:
 ## Options & notes
 
 + Set `config.link_dirs = false` in `config.lua` to have posts & pages generated at `/name.html` rather than `/name/index.html`
++ Set `config.posts_dir` and `config.pages_dir` to change the output directories for posts & pages
 + The `inc/` directory will be copied to `build/inc/`, and your template inc to `build/inc/template`
 + Add `--nocache` before the URL to ignore caching (for template dev)
 

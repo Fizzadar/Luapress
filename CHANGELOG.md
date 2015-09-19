@@ -1,3 +1,7 @@
+# 2.1.1
+
++ Add `config.posts_dir` and `config.pages_dir`
+
 # 2.1.0
 
 Many thanks to GitHub user w-oertl for contributing most of this release.
