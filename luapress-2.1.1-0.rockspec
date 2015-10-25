@@ -21,7 +21,7 @@ dependencies = {
 build = {
     type = 'builtin',
     modules = {
-        ['luapress'] = 'luapress/press.lua'
+        ['luapress'] = 'luapress/luapress.lua'
     },
     install = {
         lua = {
