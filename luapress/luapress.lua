@@ -126,7 +126,11 @@ local function build_rss(posts, templates)
         end
 
         if post.excerpt then
-            post.excerpt = post.excerpt:gsub('<[^>]+/?>', ' '):gsub('</[^>]+>', ' '):gsub('\n', '')
+            post.excerpt = util.escape_for_rss(post.excerpt)
+        end
+
+        if post.content then
+            post.content = util.escape_for_rss(post.content)
         end
 
         post.title = post.title:gsub('%p', '')

@@ -16,6 +16,24 @@ local markdown = require('luapress.lib.markdown')
 local template = require('luapress.template')
 
 
+--
+-- Escapes content for use as RSS text
+--
+-- @param content  Content to return escaped
+--
+local function escape_for_rss(content)
+    return content
+        -- Remove <script> and contents
+        :gsub('<script[^>]+>.-</script>', '')
+        -- Remove tags and self-closing
+        :gsub('<[^>]+/?>', ' ')
+        -- Remove close tags
+        :gsub('</[^>]+>', ' ')
+        -- Remove newlines
+        :gsub('\n', '')
+end
+
+
 ---
 -- Writes a header/footer wrapped HTML file depending on the modification time
 --
@@ -342,4 +360,5 @@ return {
     ensure_destination = ensure_destination,
     write_html = write_html,
     process_xref = process_xref,
+    escape_for_rss = escape_for_rss
 }
