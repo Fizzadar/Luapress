@@ -724,7 +724,8 @@ function markdown.blocks_to_html(lines, no_paragraphs)
                 table.insert(out, "<p>" .. markdown.span_transform(s) .. "</p>")
             end
         elseif line.type == "header" then
-            local s = "<h" .. line.level .. ">" .. markdown.span_transform(line.text) .. "</h" .. line.level .. ">"
+            id = line.text:gsub(' ', '-'):gsub('[^_aA-zZ0-9]', '')
+            local s = "<h" .. line.level .. " id='" .. id .. "'>" .. markdown.span_transform(line.text) .. "</h" .. line.level .. ">"
             table.insert(out, s)
         else
             table.insert(out, line.line)
