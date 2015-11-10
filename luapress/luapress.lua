@@ -174,6 +174,7 @@ local function build()
     template:set('title', config.title)
     template:set('url', config.url)
     template:set('config', config)
+    if not config.archive_title then config.archive_title = 'Archive' end
 
     -- Load template files
     if config.print then print('[1] Loading templates') end
@@ -196,10 +197,10 @@ local function build()
     -- Build the archive page (all posts) if at least one post exists
     if #posts > 0 then
         template:set('posts', posts)
-        template:set('page', {title = 'Archive'})
+        template:set('page', {title = config.archive_title})
         table.insert(pages, {
-            link = 'Archive' .. (config.link_dirs and '' or '.html'),
-            title = 'Archive',
+            link = 'archive' .. (config.link_dirs and '' or '.html'),
+            title = config.archive_title,
             time = os.time(),
             content = template:process(templates.archive),
             template = 'page',
@@ -326,6 +327,8 @@ local config = {
     index = nil,
     -- If there is a sticky top, then the landing page will be used on the index page above the posts
     sticky_page = true,    
+    -- Post archive title
+    archive_title = 'Archive',
 }
 
 return config
