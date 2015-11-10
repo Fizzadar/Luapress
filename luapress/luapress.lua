@@ -23,6 +23,25 @@ local function build_index(pages, posts, templates)
     local index = 1
     local count = 0
     local output = ''
+    
+    -- Sticky top page  Have an index.html anyway.
+    if config.sticky_page then
+      local idxpagesticky
+      if config.index then
+	  -- use specified page
+	  for _, page in ipairs(pages) do
+	  if page.name == config.index then
+	      idxpagesticky = page
+	      break
+	  end
+      end
+      else
+        -- use first page
+        idxpagesticky = pages[1]
+      end
+      template:set('post', idxpagesticky)
+      output = output .. template:process(templates.post)
+    end
 
     for k, post in ipairs(posts) do
         -- Add post to output, increase count
@@ -305,6 +324,8 @@ local config = {
     more_separator = '',
     -- Select a page as the landing page (optional, no path or suffix)
     index = nil,
+    -- If there is a sticky top, then the landing page will be used on the index page above the posts
+    sticky_page = true,    
 }
 
 return config
