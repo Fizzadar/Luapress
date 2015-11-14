@@ -23,6 +23,25 @@ local function build_index(pages, posts, templates)
     local index = 1
     local count = 0
     local output = ''
+    
+    -- Sticky top page  Have an index.html anyway.
+    if config.sticky_page then
+      local idxpagesticky
+      if config.index then
+	  -- use specified page
+	  for _, page in ipairs(pages) do
+	  if page.name == config.index then
+	      idxpagesticky = page
+	      break
+	  end
+      end
+      else
+        -- use first page
+        idxpagesticky = pages[1]
+      end
+      template:set('post', idxpagesticky)
+      output = output .. template:process(templates.post)
+    end
 
     for k, post in ipairs(posts) do
         -- Add post to output, increase count
@@ -155,6 +174,7 @@ local function build()
     template:set('title', config.title)
     template:set('url', config.url)
     template:set('config', config)
+    if not config.archive_title then config.archive_title = 'Archive' end
 
     -- Load template files
     if config.print then print('[1] Loading templates') end
@@ -177,10 +197,10 @@ local function build()
     -- Build the archive page (all posts) if at least one post exists
     if #posts > 0 then
         template:set('posts', posts)
-        template:set('page', {title = 'Archive'})
+        template:set('page', {title = config.archive_title})
         table.insert(pages, {
-            link = 'Archive' .. (config.link_dirs and '' or '.html'),
-            title = 'Archive',
+            link = 'archive' .. (config.link_dirs and '' or '.html'),
+            title = config.archive_title,
             time = os.time(),
             content = template:process(templates.archive),
             template = 'page',
@@ -305,6 +325,10 @@ local config = {
     more_separator = '',
     -- Select a page as the landing page (optional, no path or suffix)
     index = nil,
+    -- If there is a sticky top, then the landing page will be used on the index page above the posts
+    sticky_page = true,    
+    -- Post archive title
+    archive_title = 'Archive',
 }
 
 return config
