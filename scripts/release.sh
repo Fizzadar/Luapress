@@ -13,9 +13,11 @@ fi
 
 echo "--> Releasing: v$VERSION"
 
-# Tag & push to GitHub
-#git tag -a "v$VERSION" -m "v$VERSION"
-#git push --tags
+# Tag
+git tag -a "v$VERSION" -m "v$VERSION"
+
+# Push
+git push --tags
 
 # Upload rockspec?
 
