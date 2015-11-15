@@ -4,7 +4,8 @@
 -- github.com/Fizzadar/Luapress/blob/develop/luapress/default_config.lua
 
 local config = {
-    url = '/tests/blog/build'
+    url = '/tests/sticky/build',
+    sticky_page = 'sticky'
 }
 
 return config

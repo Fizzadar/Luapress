@@ -1,3 +1,20 @@
+# WIP (v3.0)
+
+Breaking:
+
++ Rename `config.index` -> `config.index_page`
++ Change default `config.pages_dir` -> `page`
++ Change default `config.posts_dir` -> `post`
+
+The rest:
+
++ Add `config.force_index_page` to create index form page even when posts exist
++ Add `config.sticky_page` to have a page appear at the top of index
++ Add `config.archive_title` to change the title of the archive page
++ Add default config, so local config can be sparse
++ Add support for multiple (url, build_dir) environments
++ Remove `alt_getopt` and handle args manually
+
 # 2.1.1
 
 + Add `config.posts_dir` and `config.pages_dir`

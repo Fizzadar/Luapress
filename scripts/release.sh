@@ -1,11 +1,22 @@
 #!/bin/sh
 
-VERSION=`cat luapress/config.lua | grep version | grep -oEi "[0-9]+\.[0-9]+\.[0-9]+"`
+echo "### Luapress"
 
-echo "# Luapress"
-echo "# Releasing: v$VERSION"
+VERSION=`cat luapress/config.lua | grep version | grep -oEi "[0-9]+\.[0-9]+\.?[0-9]*"`
+ROCKSPEC="luapress-${VERSION}-*.rockspec"
 
-git tag -a "v$VERSION" -m "v$VERSION"
-git push --tags
+# Ensure rockspec in sync w/ config.lua
+if [ ! -f $ROCKSPEC ]; then
+    echo "--> Missing rockspec: ${ROCKSPEC}"
+    exit 1
+fi
 
-echo "# Done!"
+echo "--> Releasing: v$VERSION"
+
+# Tag & push to GitHub
+#git tag -a "v$VERSION" -m "v$VERSION"
+#git push --tags
+
+# Upload rockspec?
+
+echo "--> Done!"

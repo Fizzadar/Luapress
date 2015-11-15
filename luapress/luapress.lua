@@ -11,9 +11,10 @@ local table = table
 
 local lfs = require('lfs')
 
+local luapress_config = require('luapress.config')
 local util = require('luapress.util')
 local template = require('luapress.template')
-
+local table_to_lua = require('luapress.lib.table_to_lua')
 
 ---
 -- Generate one or more index files for all posts, or use
@@ -23,26 +24,66 @@ local function build_index(pages, posts, templates)
     local index = 1
     local count = 0
     local output = ''
-    
-    -- Sticky top page  Have an index.html anyway.
-    if config.sticky_page then
-      local idxpagesticky
-      if config.index then
-	  -- use specified page
-	  for _, page in ipairs(pages) do
-	  if page.name == config.index then
-	      idxpagesticky = page
-	      break
-	  end
-      end
-      else
-        -- use first page
-        idxpagesticky = pages[1]
-      end
-      template:set('post', idxpagesticky)
-      output = output .. template:process(templates.post)
+
+    -- No posts at all, but at least one page, or forced? Have an index.html anyway.
+    if (#posts == 0 and #pages > 0) or config.force_index_page then
+        local index_page
+
+        -- If specified, we'll use the defined page
+        if config.index_page then
+            -- Use specified page
+            for _, page in ipairs(pages) do
+                if page.name == config.index_page then
+                    index_page = page
+                    break
+                end
+            end
+
+        -- Else we use first page
+        else
+            index_page = pages[1]
+        end
+
+        -- The "copy file" part of util.copy_dir could be refactored into
+        -- a separate function and used here.
+        if index_page then
+            -- Work out built file location
+            local bdir = config.root .. '/' .. config.build_dir .. '/'
+            local filename = bdir .. config.pages_dir .. '/' .. index_page.link
+            if config.link_dirs then
+                filename = filename .. '/index.html'
+            end
+
+            util.copy_file(filename, bdir .. 'index.html')
+        end
+
+        -- No posts, no point continuing!
+        return
     end
 
+    -- Sticky top page  - inject to top of index.html
+    if config.sticky_page then
+        local sticky_page
+        -- Use specified page
+        for _, page in ipairs(pages) do
+            if page.name == config.sticky_page then
+                sticky_page = page
+                break
+            end
+        end
+
+        -- We have a sticky page, attach it to the first index.html before any posts
+        if sticky_page then
+            template:set('page', sticky_page)
+            output = output .. template:process(templates.page)
+
+        -- Error if the sticky page doesn't exist
+        else
+            error('Sticky page "' .. config.sticky_page .. '" not found')
+        end
+    end
+
+    -- Now start building the indexes
     for k, post in ipairs(posts) do
         -- Add post to output, increase count
         template:set('post', post)
@@ -58,7 +99,8 @@ local function build_index(pages, posts, templates)
             else
                 f, err = io.open(config.root .. '/' .. config.build_dir .. '/index' .. index .. '.html', 'w')
             end
-            if not f then error(err) end
+
+            if err then error(err) end
 
             -- Work out previous page
             if index > 1 then
@@ -93,36 +135,6 @@ local function build_index(pages, posts, templates)
             output = ''
             if config.print then print('\tindex ' .. index) end
             index = index + 1
-        end
-    end
-
-    -- No posts at all, but at least one page?  Have an index.html anyway.
-    if #posts == 0 and #pages > 0 then
-        local idxpage
-        if config.index then
-            -- use specified page
-            for _, page in ipairs(pages) do
-                if page.name == config.index then
-                    idxpage = page
-                    break
-                end
-            end
-        else
-            -- use first page
-            idxpage = pages[1]
-        end
-
-        -- The "copy file" part of util.copy_dir could be refactored into
-        -- a separate function and used here.
-        if idxpage then
-            -- Work out built file location
-            local bdir = config.root .. '/' .. config.build_dir .. '/'
-            local filename = bdir .. "pages/" .. idxpage.link
-            if config.link_dirs then
-                filename = filename .. '/index.html'
-            end
-
-            util.copy_file(filename, bdir .. 'index.html')
         end
     end
 end
@@ -174,7 +186,6 @@ local function build()
     template:set('title', config.title)
     template:set('url', config.url)
     template:set('config', config)
-    if not config.archive_title then config.archive_title = 'Archive' end
 
     -- Load template files
     if config.print then print('[1] Loading templates') end
@@ -304,32 +315,20 @@ local function make_skeleton(root, url)
         return
     end
 
-    -- Basic config template
-    local config_code = [[
--- Autogenerated by Luapress
-local config = {
-    -- Blog base url
-    url = ']] .. url .. [[',
-    -- Blog title
-    title = 'A Lone Ship',
-    -- Template name
-    template = 'default',
-    -- Posts per page
-    posts_per_page = 2,
-    -- Link directories not files
-    link_dirs = true,
-    -- Control the output directories for posts & pages
-    pages_dir = nil,
-    posts_dir = nil,
-    -- Separator to put inside <a id="more"></a> link
-    more_separator = '',
-    -- Select a page as the landing page (optional, no path or suffix)
-    index = nil,
-    -- If there is a sticky top, then the landing page will be used on the index page above the posts
-    sticky_page = true,    
-    -- Post archive title
-    archive_title = 'Archive',
-}
+    -- A basic config with just the default environment set to URL
+    local basic_config = {
+        url = url
+    }
+
+    -- Convert the default config from Lua table to Lua code
+    local config_code = [[-- Autogenerated by Luapress v]] .. luapress_config.version .. [[
+
+-- For available configuation options, see: fizzadar.com/luapress
+-- Or see the default config at:
+-- github.com/Fizzadar/Luapress/blob/develop/luapress/default_config.lua
+
+local config = ]] .. table_to_lua(basic_config) .. [[
+
 
 return config
 ]]

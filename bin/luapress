@@ -4,72 +4,87 @@
 -- File: bin/luapress
 -- Desc: Luapress CLI
 
+local os = os
+local print = print
+local table = table
+local pairs = pairs
+local ipairs = ipairs
+
 local luapress_config = require('luapress.config')
 
-local doc = [[
+local help_doc = [[
 Luapress v]] .. luapress_config.version .. [[
 
 
 Usage:
-    luapress [<url>]
-    luapress [--build <dir>] [--nocache] [<url>]
-    luapress init <url>
+    luapress [--no-cache]
+    luapress (ENV | URL) [--no-cache]
+    luapress init URL
     luapress --help
 
 Options:
-    <url>         Base URL to build links from.
+    ENV           Build against different directories/urls with environments.
+    URL           Build with a different base url.
     init          Start new blog in the current directory.
-    --nocache     Rewrite everything, ignoring update times.
-    --build <dir> Change the output dir (default=build).
+    URL           Default base URL for the new blog.
+    --no-cache    Rewrite everything, ignoring update times.
     -h --help     Show this help screen.
     --version     Show version.]]
 
-require('alt_getopt')
+-- Store opts
+local opts = {
+    env = nil,
+    url = nil,
+    init = false,
+    no_cache = false,
+    help = false,
+    version = false
+}
 
--- Handle input/docstring
-local opts, idn = alt_getopt.get_opts(arg, 'nhvb', {
-    nocache = 'n',
-    help = 'h',
-    version = 'v',
-    build = 'b'
-})
+-- Parse named opts, capture other opts
+new_arg = {}
+for key, value in ipairs(arg) do
+    -- Cache when building?
+    if value == '--no-cache' then
+        opts.no_cache = true
+    -- Start a new site
+    elseif value == 'init' then
+        opts.init = true
+    -- Show help
+    elseif value == '-h' or value == '--help' then
+        opts.help = true
+    -- Show version
+    elseif value == '--version' then
+        opts.version = true
+    -- Unknown arg? Attach to new_arg
+    else
+        table.insert(new_arg, value)
+    end
+end
+
 
 -- Handle help output/exit
-if opts.h then
-    print(doc)
+if opts.help then
+    print(help_doc)
     os.exit()
 end
 
 -- Handle version output/exit
-if opts.v then
-
+if opts.version then
     print('Luapress v' .. luapress_config.version)
     os.exit()
 end
 
+
+-- OK, we're doing something
 local lfs = require('lfs')
 local luapress = require('luapress')
 
-
--- Handle build dir
-if opts.b then
-    opts.b = arg[idn]
-    idn = idn + 1
-end
-
--- Turn opts into something more readable
-local opts = {
-    cache = opts.n ~= 1,
-    init = arg[idn] == 'init',
-    build = opts.b or 'build'
-}
-
-
 -- Init?
 if opts.init then
-    local url = arg[idn + 1]
+    local url = new_arg[1]
     if not url then
-        print('Missing <url> parameter, please use: luapress init <url>')
+        print('Missing URL parameter, please use: luapress init URL')
         os.exit(1)
     end
 
@@ -81,70 +96,112 @@ if opts.init then
 
     print('All ready! Just drop markdown files into ./posts & ./pages and run luapress')
     os.exit()
-end
 
 
--- Ensure local config file
-local _, err = io.open('config.lua', 'r')
-if err then
-    print(err)
-    print('Missing ./config.lua, have you run `luapress init`?')
-    os.exit(1)
-end
+-- Build!
+else
+    -- Check if we have an URL or ENV
+    local env_or_url = new_arg[1]
+    local env, url
 
--- Load the local config file into a global variable.
-config = require('config')
+    if env_or_url then
+        if env_or_url:find('^https?:%/%/') then
+            url = env_or_url
+        else
+            env = env_or_url
+        end
+    end
 
--- Check/setup url
-config.url = arg[idn] or config.url
--- Attach opts to config
-config.cache = opts.cache
-config.print = true
-config.build_dir = opts.build
-config.root = lfs.currentdir()
--- location of the bin directory (probably /usr/local/lib/luarocks/rocks/luapress/*/)
-config.base = string.gsub(arg[0], "/[^/]-/[^/]-$", "")
-
--- Config defaults
-config.posts_dir = config.posts_dir or 'posts'
-config.pages_dir = config.pages_dir or 'pages'
-
--- Read the "previous url" from the cache file
-local f, err = io.open('.luapress', 'r')
-if f then
-    url, err = f:read('*a')
+    -- Ensure local config file
+    local _, err = io.open('config.lua', 'r')
     if err then
-        print('Could not read cache file .luapress: ' .. err)
+        print(err)
+        print('Missing ./config.lua, have you run `luapress init URL`?')
         os.exit(1)
     end
 
-    -- If the url is new, no caching
-    if url ~= config.url then
-        print('Disabling cache as url in .luapress different')
-        config.cache = false
+    -- Load the local config file into a global variable.
+    config = require('config')
+
+    -- Get the default config, apply them to config
+    local default_config = require('luapress.default_config')
+    for key, value in pairs(default_config) do
+        if not config[key] then
+            config[key] = value
+        end
     end
 
-    f:close()
+    -- If url is set via args, it overrides all
+    if url then
+        config.url = url
+    end
+
+    -- If env is set, pull it's data and override url/build_dir on config
+    if env then
+        env_data = config.envs[env]
+        if not env_data then
+            print('Missing environment: ' .. tostring(env))
+            os.exit(1)
+        end
+
+        -- Apply the env, both build_dir and url are optional
+        config.build_dir = env_data.build_dir or config.build_dir
+        config.url = env_data.url or config.url
+    end
+
+    -- Got no url?
+    if not config.url then
+        print('No url set in config.lua or passed in via arguments!')
+        os.exit(1)
+    end
+
+    -- Attach other opts to config
+    config.print = true
+    config.root = lfs.currentdir()
+    -- Cache - will set to false below if url changes between runs
+    config.cache = not opts.no_cache
+    -- location of the bin directory (probably /usr/local/lib/luarocks/rocks/luapress/*/)
+    config.base = arg[0]:gsub('/[^/]-/[^/]-$', '')
+
+    -- Read the "previous url" from the cache file
+    local f, err = io.open('.luapress', 'r')
+    if f then
+        url, err = f:read('*a')
+        if err then
+            print('Could not read cache file .luapress: ' .. err)
+            os.exit(1)
+        end
+
+        -- If the url is new, no caching
+        if url ~= config.url then
+            print('Disabling cache as url in .luapress different')
+            config.cache = false
+        end
+
+        f:close()
+    end
+
+    -- Ensure the build directory
+    luapress.make_build()
+
+    -- Build the blog
+    local status, err = luapress.build()
+    if err then
+        print(err)
+        os.exit(1)
+    end
+
+    -- Save the url to the local cache file
+    local f, err = io.open('.luapress', 'w')
+    if f then
+        f:write(config.url)
+        f:close()
+    end
+
+    print('')
+    print('Press complete! Upload ./' .. config.build_dir .. ' to your website')
+    os.exit()
 end
 
--- Ensure the build directory
-luapress.make_build()
-
--- Build the blog
-local status, err = luapress.build()
-if err then
-    print(err)
-    os.exit(1)
-end
-
--- Save the url to the local cache file
-local f, err = io.open('.luapress', 'w')
-if f then
-    f:write(config.url)
-    f:close()
-end
-
-print('')
-print('Press complete! Upload ./' .. config.build_dir .. ' to your website')
-os.exit()
-
+print('Unknown mode/arguments? This should never appear.')
+os.exit(1)

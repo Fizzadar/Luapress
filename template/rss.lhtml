@@ -7,8 +7,8 @@
         <item>
             <title><?=post.title ?></title>
             <description><? if post.excerpt then ?><?=post.excerpt ?><? else ?><?=post.content ?><? end ?></description>
-            <link><?=self:get('url') ?>/posts/<?=post.link ?></link>
-            <guid><?=self:get('url') ?>/posts/<?=post.link ?></guid>
+            <link><?=self:get('url') ?>/<?=self:get('config').posts_dir ?>/<?=post.link ?></link>
+            <guid><?=self:get('url') ?>/<?=self:get('config').posts_dir ?>/<?=post.link ?></guid>
         </item>
 <? end ?>
     </channel>
