@@ -28,7 +28,9 @@ build = {
             ['luapress.config'] = 'luapress/config.lua',
             ['luapress.template'] = 'luapress/template.lua',
             ['luapress.util'] = 'luapress/util.lua',
-            ['luapress.lib.markdown'] = 'luapress/lib/markdown.lua'
+            ['luapress.default_config'] = 'luapress/default_config.lua',
+            ['luapress.lib.markdown'] = 'luapress/lib/markdown.lua',
+            ['luapress.lib.table_to_lua'] = 'luapress/lib/table_to_lua.lua'
         },
         bin = {
             'bin/luapress'
@@ -36,6 +38,6 @@ build = {
     },
     copy_directories = {
         'plugins',
-	'template',
-    },
+	   'template'
+    }
 }
