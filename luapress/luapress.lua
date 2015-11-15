@@ -79,32 +79,32 @@ local function build_index(pages, posts, templates)
 
     -- No posts at all, but at least one page?  Have an index.html anyway.
     if #posts == 0 and #pages > 0 then
-    local idxpage
-    if config.index then
-        -- use specified page
-        for _, page in ipairs(pages) do
-        if page.name == config.index then
-            idxpage = page
-            break
-        end
-        end
-    else
-        -- use first page
-        idxpage = pages[1]
-    end
-
-    -- The "copy file" part of util.copy_dir could be refactored into
-    -- a separate function and used here.
-    if idxpage then
-        -- Work out built file location
-        local bdir = config.root .. '/' .. config.build_dir .. '/'
-        local filename = bdir .. "pages/" .. idxpage.link
-        if config.link_dirs then
-            filename = filename .. '/index.html'
+        local idxpage
+        if config.index then
+            -- use specified page
+            for _, page in ipairs(pages) do
+                if page.name == config.index then
+                    idxpage = page
+                    break
+                end
+            end
+        else
+            -- use first page
+            idxpage = pages[1]
         end
 
-        util.copy_file(filename, bdir .. 'index.html')
-    end
+        -- The "copy file" part of util.copy_dir could be refactored into
+        -- a separate function and used here.
+        if idxpage then
+            -- Work out built file location
+            local bdir = config.root .. '/' .. config.build_dir .. '/'
+            local filename = bdir .. "pages/" .. idxpage.link
+            if config.link_dirs then
+                filename = filename .. '/index.html'
+            end
+
+            util.copy_file(filename, bdir .. 'index.html')
+        end
     end
 end
 
