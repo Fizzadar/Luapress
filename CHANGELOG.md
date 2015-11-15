@@ -5,6 +5,7 @@ Breaking:
 + Rename `config.index` -> `config.index_page`
 + Change default `config.pages_dir` -> `page`
 + Change default `config.posts_dir` -> `post`
++ Change CLI arg `--nocache` -> `--no-cache`
 
 The rest:
 
