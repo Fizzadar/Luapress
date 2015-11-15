@@ -96,12 +96,12 @@ end
 -- @param out  Table describing the page or post
 -- @result  Processed string
 --
-local function process_plugins(s, out)
+local function _process_plugins(s, out)
     local pos = 1
     while pos < #s do
-    local a, b = s:find('%$!.-!%$', pos)
+    local a, b = s:find('\n%$!.-!%$', pos)
     if not a then break end
-    local s2 = s:sub(a + 2, b - 2)
+    local s2 = s:sub(a + 3, b - 2)
     local pl, arg = s2:match('^ *(%w+) *(.*)$')
     if not pl then
         error('Empty plugin call in ' .. out.source)
@@ -130,6 +130,51 @@ local function process_plugins(s, out)
     end
 
     return s
+end
+
+
+local function _process_content(s, item)
+    blocks = {}
+
+    -- First, extract any $raw$ blocks
+    local counter = 0
+    for block in s:gmatch('\n%$raw%$\n(.-)\n%$%/raw%$\n') do
+        blocks[counter] = block
+        counter = counter + 1
+    end
+    s = s:gsub('\n%$raw%$\n.-\n%$%/raw%$\n', '$raw$')
+
+    -- Set $=key's
+    s = s:gsub('%$=url', config.url)
+
+    -- Get $key=value's (and remove from string)
+    for k, v in s:gmatch('%$([%w]+)=(.-)\n') do
+        item[k] = v
+    end
+    s = s:gsub('%$[%w]+=.-\n', '')
+
+    -- Hande plugins
+    s = _process_plugins(s, item)
+
+    -- Excerpt
+    local start, _ = s:find('%-%-MORE%-%-', 1)
+
+    if start then
+        -- Extract the excerpt
+        item.excerpt = markdown(s:sub(0, start - 1))
+        -- Replace the --MORE--
+        local sep = config.more_separator or ''
+        s = s:gsub('%-%-MORE%-%-', '<a id="more">' .. sep .. '</a>')
+    end
+
+    -- Now we've processed internal extras, restore $raw$ blocks
+    local counter = 0
+    for block in s:gmatch('%$raw%$') do
+        s = s:gsub('%$raw%$', blocks[counter], counter + 1)
+        counter = counter + 1
+    end
+
+    item.content = markdown(s)
 end
 
 
@@ -174,29 +219,8 @@ local function load_markdowns(directory, template)
             local f = assert(io.open(file2, 'r'))
             local s = assert(f:read('*a'))
 
-            -- Set $=key's
-            s = s:gsub('%$=url', config.url)
-
-            -- Get $key=value's (and remove from string)
-            for k, v in s:gmatch('%$([%w]+)=(.-)\n') do
-                item[k] = v
-            end
-            s = s:gsub('%$[%w]+=.-\n', '')
-
-            -- Hande plugins
-            s = process_plugins(s, item)
-
-            -- Excerpt
-            local start, _ = s:find('--MORE--', 1, true)
-            if start then
-                -- Extract the excerpt
-                item.excerpt = markdown(s:sub(0, start - 1))
-                -- Replace the --MORE--
-                local sep = config.more_separator or ''
-                s = s:gsub('%-%-MORE%-%-', '<a id="more">' .. sep .. '</a>')
-            end
-
-            item.content = markdown(s)
+            -- Parse out internal extras and then markdown it
+            _process_content(s, item)
 
             -- Date set?
             if item.date then
@@ -205,7 +229,7 @@ local function load_markdowns(directory, template)
             end
 
             -- Insert to items
-        items[#items + 1] = item
+            items[#items + 1] = item
             if config.print then print('\t' .. item.title) end
         end
     end
