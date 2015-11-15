@@ -159,7 +159,7 @@ local function process(page, arg)
     -- build index (HTML code that replaces the plugin call)
     local tbl = {}
     for i, img in ipairs(images) do
-	tbl[#tbl + 1] = string.format("<a href=\"%s\"><img src=\"%s\"></a>\n",
+	tbl[#tbl + 1] = string.format("<a href=\"%s\"><img src=\"%s\" /></a>\n",
 	    config.url .. "/gallery/" .. img.subdir .. "/" .. img.htmlbase,
 	    config.url .. "/gallery/" .. img.subdir .. "/thumbs/" .. img.imgname)
     end
