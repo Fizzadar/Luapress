@@ -17,8 +17,8 @@ Luapress v]] .. luapress_config.version .. [[
 
 
 Usage:
-    luapress [--no-cache]
-    luapress (ENV | URL) [--no-cache]
+    luapress [options]
+    luapress (ENV | URL) [options]
     luapress init URL
     luapress --help
 
@@ -28,34 +28,39 @@ Options:
     init          Start new blog in the current directory.
     URL           Default base URL for the new blog.
     --no-cache    Rewrite everything, ignoring update times.
+    --watch       Watch post/page changes and rebuild each time.
     -h --help     Show this help screen.
     --version     Show version.]]
 
+
 -- Store opts
 local opts = {
+    -- Unamed args, parsed later
     env = nil,
     url = nil,
+    -- Booleans for arg_to_opt below
     init = false,
     no_cache = false,
+    watch = false,
     help = false,
     version = false
 }
 
--- Parse named opts, capture other opts
+-- Parse named/boolean opts, capture other opts
 new_arg = {}
+arg_to_opt = {
+    ['--no-cache'] = 'no_cache',
+    ['--watch'] = 'watch',
+    ['init'] = 'init',
+    ['-h'] = 'help',
+    ['--help'] = 'help',
+    ['--version'] = 'version'
+}
+
 for key, value in ipairs(arg) do
-    -- Cache when building?
-    if value == '--no-cache' then
-        opts.no_cache = true
-    -- Start a new site
-    elseif value == 'init' then
-        opts.init = true
-    -- Show help
-    elseif value == '-h' or value == '--help' then
-        opts.help = true
-    -- Show version
-    elseif value == '--version' then
-        opts.version = true
+    if arg_to_opt[value] then
+        opts[arg_to_opt[value]] = true
+
     -- Unknown arg? Attach to new_arg
     else
         table.insert(new_arg, value)
@@ -184,22 +189,41 @@ else
     -- Ensure the build directory
     luapress.make_build()
 
-    -- Build the blog
-    local status, err = luapress.build()
-    if err then
-        print(err)
-        os.exit(1)
+    local function build()
+        -- Build the blog
+        local status, err = luapress.build()
+        if err then
+            print(err)
+            os.exit(1)
+        end
+
+        -- Save the url to the local cache file
+        local f, err = io.open('.luapress', 'w')
+        if f then
+            f:write(config.url)
+            f:close()
+        end
+
+        print('')
+        print('Press complete! Upload ./' .. config.build_dir .. ' to your website')
     end
 
-    -- Save the url to the local cache file
-    local f, err = io.open('.luapress', 'w')
-    if f then
-        f:write(config.url)
-        f:close()
+    -- Watching?
+    if opts.watch then
+        local posix_test = os.execute('uname')
+        if not posix_test then
+            print('Sorry, only POSIX systems support --watch.')
+            os.exit(1)
+        end
+
+        local watch_directory = require('luapress.lib.watch_directory')
+        watch_directory({'posts', 'pages'}, build)
+
+    -- Normal build
+    else
+        build()
     end
 
-    print('')
-    print('Press complete! Upload ./' .. config.build_dir .. ' to your website')
     os.exit()
 end
 

@@ -374,6 +374,7 @@ local function process_xref(pages, posts)
 
 end
 
+
 -- Export
 return {
     copy_file = copy_file,
