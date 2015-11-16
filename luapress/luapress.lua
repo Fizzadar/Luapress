@@ -15,6 +15,8 @@ local luapress_config = require('luapress.config')
 local util = require('luapress.util')
 local template = require('luapress.template')
 local table_to_lua = require('luapress.lib.table_to_lua')
+local cli = require('luapress.lib.cli')
+
 
 ---
 -- Generate one or more index files for all posts, or use
@@ -79,7 +81,7 @@ local function build_index(pages, posts, templates)
 
         -- Error if the sticky page doesn't exist
         else
-            error('Sticky page "' .. config.sticky_page .. '" not found')
+            cli.error('Sticky page "' .. config.sticky_page .. '" not found')
         end
     end
 
@@ -100,7 +102,7 @@ local function build_index(pages, posts, templates)
                 f, err = io.open(config.root .. '/' .. config.build_dir .. '/index' .. index .. '.html', 'w')
             end
 
-            if err then error(err) end
+            if err then cli.error(err) end
 
             -- Work out previous page
             if index > 1 then
@@ -127,7 +129,7 @@ local function build_index(pages, posts, templates)
             -- Create and write output
             output = template:process(templates.header) .. output .. template:process(templates.footer)
             local result, err = f:write(output)
-            if not result then error(err) end
+            if not result then cli.error(err) end
             f:close()
 
             -- Reset & close f
@@ -171,9 +173,9 @@ local function build_rss(posts, templates)
     template:set('posts', rssposts)
     local rss = template:process(templates.rss)
     local f, err = io.open(config.root .. '/' .. config.build_dir .. '/index.xml', 'w')
-    if not f then error(err) end
+    if not f then cli.error(err) end
     local result, err = f:write(rss)
-    if not result then error(err) end
+    if not result then cli.error(err) end
     f:close()
 end
 

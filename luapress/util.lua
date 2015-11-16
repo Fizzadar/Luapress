@@ -12,8 +12,9 @@ local string = string
 
 local lfs = require('lfs')
 
-local markdown = require('luapress.lib.markdown')
 local template = require('luapress.template')
+local markdown = require('luapress.lib.markdown')
+local cli = require('luapress.lib.cli')
 
 
 --
@@ -52,9 +53,9 @@ local function write_html(destination, object, templates)
     if config.print then print('\t' .. object.title) end
     local output = template:process(templates.header, templates[object.template], templates.footer)
     f, err = io.open(destination, 'w')
-    if not f then error(err) end
+    if not f then cli.error(err) end
     local result, err = f:write(output)
-    if not result then error(err) end
+    if not result then cli.error(err) end
     f:close()
 
 end
@@ -104,7 +105,7 @@ local function _process_plugins(s, out)
     local s2 = s:sub(a + 3, b - 2)
     local pl, arg = s2:match('^ *(%w+) *(.*)$')
     if not pl then
-        error('Empty plugin call in ' .. out.source)
+        cli.error('Empty plugin call in ' .. out.source)
     end
 
     -- convert args to a table
@@ -250,9 +251,9 @@ local function load_templates()
             local tmpl_name = file:sub(0, -7)
             file = directory .. '/' .. file
             local f, err = io.open(file, 'r')
-            if not f then error(err) end
+            if not f then cli.error(err) end
             local s, err = f:read('*a')
-            if not s then error(err) end
+            if not s then cli.error(err) end
             f:close()
 
             templates[tmpl_name] = s
@@ -269,10 +270,10 @@ end
 local function copy_file(source, destination)
     -- Open current file
     local f, err = io.open(source, 'r')
-    if not f then error(err) end
+    if not f then cli.error(err) end
     -- Read file
     local s, err = f:read('*a')
-    if not s then error(err) end
+    if not s then cli.error(err) end
     f:close()
 
     -- Open new file for creation
@@ -281,7 +282,7 @@ local function copy_file(source, destination)
 
     -- Write contents
     local result, err = f:write(s)
-    if not result then error(err) end
+    if not result then cli.error(err) end
     f:close()
 
     print('\t' .. destination)

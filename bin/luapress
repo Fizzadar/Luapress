@@ -11,6 +11,7 @@ local pairs = pairs
 local ipairs = ipairs
 
 local luapress_config = require('luapress.config')
+local cli = require('luapress.lib.cli')
 
 local help_doc = [[
 Luapress v]] .. luapress_config.version .. [[
@@ -76,8 +77,7 @@ end
 
 -- Handle version output/exit
 if opts.version then
-    print('Luapress v' .. luapress_config.version)
-    os.exit()
+    cli.exit('Luapress v' .. luapress_config.version)
 end
 
 
@@ -89,40 +89,43 @@ local luapress = require('luapress')
 if opts.init then
     local url = new_arg[1]
     if not url then
-        print('Missing URL parameter, please use: luapress init URL')
-        os.exit(1)
+        cli.error('Missing URL parameter, please use: luapress init URL')
     end
 
     local status, err = luapress.make_skeleton(lfs.currentdir(), url)
     if err then
-        print(err)
-        os.exit(1)
+        cli.error(err)
     end
 
-    print('All ready! Just drop markdown files into ./posts & ./pages and run luapress')
-    os.exit()
+    cli.exit(
+        'All ready! Just drop markdown files into ./posts & ./pages and run luapress'
+    )
 
 
 -- Build!
 else
+    print('### Luapress v' .. luapress_config.version)
+    print()
+
     -- Check if we have an URL or ENV
     local env_or_url = new_arg[1]
     local env, url
 
     if env_or_url then
-        if env_or_url:find('^https?:%/%/') then
-            url = env_or_url
-        else
+        -- If alphanumeric, env
+        if env_or_url:find('^%w+$') then
             env = env_or_url
+
+        -- Otherwise, url
+        else
+            url = env_or_url
         end
     end
 
     -- Ensure local config file
     local _, err = io.open('config.lua', 'r')
     if err then
-        print(err)
-        print('Missing ./config.lua, have you run `luapress init URL`?')
-        os.exit(1)
+        cli.error('Could not locate ./config.lua, have you run `luapress init URL`?')
     end
 
     -- Load the local config file into a global variable.
@@ -145,8 +148,7 @@ else
     if env then
         env_data = config.envs[env]
         if not env_data then
-            print('Missing environment: ' .. tostring(env))
-            os.exit(1)
+            cli.error('Missing environment: ' .. tostring(env))
         end
 
         -- Apply the env, both build_dir and url are optional
@@ -156,8 +158,7 @@ else
 
     -- Got no url?
     if not config.url then
-        print('No url set in config.lua or passed in via arguments!')
-        os.exit(1)
+        cli.error('No url set in config.lua or passed in via arguments!')
     end
 
     -- Attach other opts to config
@@ -173,13 +174,12 @@ else
     if f then
         url, err = f:read('*a')
         if err then
-            print('Could not read cache file .luapress: ' .. err)
-            os.exit(1)
+            cli.error('Could not read cache file .luapress: ' .. err)
         end
 
         -- If the url is new, no caching
         if url ~= config.url then
-            print('Disabling cache as url in .luapress different')
+            cli.log('Disabling cache as url in .luapress different')
             config.cache = false
         end
 
@@ -193,8 +193,7 @@ else
         -- Build the blog
         local status, err = luapress.build()
         if err then
-            print(err)
-            os.exit(1)
+            cli.error(err)
         end
 
         -- Save the url to the local cache file
@@ -204,16 +203,18 @@ else
             f:close()
         end
 
-        print('')
-        print('Press complete! Upload ./' .. config.build_dir .. ' to your website')
+        print()
+        cli.log(
+            'Press complete! Upload ./' .. config.build_dir .. ' to your website',
+            'green'
+        )
     end
 
     -- Watching?
     if opts.watch then
         local posix_test = os.execute('uname')
         if not posix_test then
-            print('Sorry, only POSIX systems support --watch.')
-            os.exit(1)
+            cli.error('Sorry, only POSIX systems support --watch.')
         end
 
         local watch_directory = require('luapress.lib.watch_directory')
@@ -227,5 +228,4 @@ else
     os.exit()
 end
 
-print('Unknown mode/arguments? This should never appear.')
-os.exit(1)
+cli.error('Unknown mode/arguments? This should never appear.')
