@@ -1,21 +1,21 @@
 package = 'Luapress'
-version = '2.1.1-0'
+version = '3.0-0'
 
 source = {
-    url = 'git://github.com/Fizzadar/luapress.git',
-    tag = 'v2.1.1'
+    url = 'git://github.com/Fizzadar/Luapress.git',
+    tag = 'v3.0'
 }
 
 description = {
-    summary = 'Luapress builds static blogs from markdown files',
-    homepage = 'https://github.com/Fizzadar/luapress',
+    summary = 'Luapress builds static sites from markdown files',
+    homepage = 'https://github.com/Fizzadar/Luapress',
     license =   'MIT'
 }
 
 dependencies = {
     'lua >= 5.1',
-    'alt-getopt',
-    'luafilesystem'
+    'luafilesystem',
+    'ansicolors'
 }
 
 build = {
@@ -30,7 +30,9 @@ build = {
             ['luapress.util'] = 'luapress/util.lua',
             ['luapress.default_config'] = 'luapress/default_config.lua',
             ['luapress.lib.markdown'] = 'luapress/lib/markdown.lua',
-            ['luapress.lib.table_to_lua'] = 'luapress/lib/table_to_lua.lua'
+            ['luapress.lib.table_to_lua'] = 'luapress/lib/table_to_lua.lua',
+            ['luapress.lib.watch_directory'] = 'luapress/lib/watch_directory.lua',
+            ['luapress.lib.cli'] = 'luapress/lib/cli.lua'
         },
         bin = {
             'bin/luapress'
@@ -38,6 +40,6 @@ build = {
     },
     copy_directories = {
         'plugins',
-	   'template'
+        'template'
     }
 }

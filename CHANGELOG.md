@@ -1,29 +1,30 @@
-# WIP (v3.0)
+# v3.0
 
 Breaking:
 
 + Rename `config.index` -> `config.index_page`
-+ Change default `config.pages_dir` -> `page`
-+ Change default `config.posts_dir` -> `post`
 + Change CLI arg `--nocache` -> `--no-cache`
 
 The rest:
 
++ Add support for multiple (url, build_dir) environments
 + Add `config.force_index_page` to create index form page even when posts exist
 + Add `config.sticky_page` to have a page appear at the top of index
 + Add `config.archive_title` to change the title of the archive page
-+ Add support for multiple (url, build_dir) environments
-+ Add default config, so local config can be sparse
++ Add `--watch` command line to rebuild on changes to posts/ & pages/ (no Windows support :()
 + Add ID attribute to `<hX>` tags in markdown lib
++ Add $raw$...$/raw$ syntax to disable Markdown extras
++ Add default config, so local config can be sparse
 + Fix escaping for post & gallery RSS content
 + Rename `press.lua` -> `luapress.lua`
 + Remove `alt_getopt` and handle args manually
++ Nicer (colored, where possible) terminal output
 
-# 2.1.1
+# v2.1.1
 
 + Add `config.posts_dir` and `config.pages_dir`
 
-# 2.1.0
+# v2.1.0
 
 Many thanks to GitHub user w-oertl for contributing most of this release.
 
