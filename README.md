@@ -1,46 +1,42 @@
-# Luapress v2.1
+# Luapress v3.0
 
-Luapress is *yet another* static ~~blog~~ site generator, written in Lua, with posts in markdown. Now with single page and plugin support.
+Luapress is *yet another* static site generator, written in Lua, with posts in markdown. It's simple, fast and supports both plugins and templates.
 
-## Install
 
-`luarocks install luapress`
+## Quick Start
 
-## How-To
+Install with Luarocks:
 
 ```
-Luapress v2
-
-Usage:
-    luapress [<url>]
-    luapress [--build <dir>] [--nocache] [<url>]
-    luapress init <url>
-    luapress --help
+luarocks install luapress
 ```
 
-+ Create an empty directory, cd into it
-+ Run `luapress init` to create the base config/directories
-+ Drop markdown files in `posts/` and `pages/`
-+ Run `luapress`
-+ Copy the contents of `build/` to web
+Create a new site in some directory:
 
-## Post/page markdown extras
+```
+luapress init URL
+```
 
-+ Set `$key=value` in posts for custom data (use `<?=self:get('post').key ?>` in template)
-+ Set `$time=time_in_epoch_seconds` or `$date=day/month/year` to customize post time (default file update time)
-+ Use `--MORE--` to generate a excerpt/read-more link in posts
-+ Use `[=pages|posts/NAME]` to generate crosslinks between posts/pages
-+ Use `$! NAME arg, arg, arg !$` to use plugins in posts/pages
-+ In pages set `$order=number` to determine page ordering in links list
-+ Hide pages from the link list with `$hidden=true`
+Drop Markdown files in `posts/` & `pages/` and build with:
 
-## Options & notes
+```
+luapress
+```
 
-+ Set `config.link_dirs = false` in `config.lua` to have posts & pages generated at `/name.html` rather than `/name/index.html`
-+ Set `config.posts_dir` and `config.pages_dir` to change the output directories for posts & pages
-+ The `inc/` directory will be copied to `build/inc/`, and your template inc to `build/inc/template`
-+ Add `--nocache` before the URL to ignore caching (for template dev)
+Now, just upload the contents of `build/` to the web.
+
+
+## Next Steps
+
+Luapress offers many other features, which are documented on [it's website](http://luapress.org):
+
++ [Markdown extras](http://luapress.org/#MarkdownExtras)
++ [Config options](http://luapress.org/#ConfigOptions)
++ [Environments](http://luapress.org/#Environments)
++ [Templates](http://luapress.org/#Templates)
++ [Plugins](http://luapress.org/#Plugins)
+
 
 ## Example
 
-I'm using it for my blog, [Pointless Ramblings](http://pointlessramblings.com).
+I'm using it for my blog, [Pointless Ramblings](http://pointlessramblings.com). The [Luapress website](https://github.com/Fizzadar/luapress.org) itself is also powered by Luapress :).
