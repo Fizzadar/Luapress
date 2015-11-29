@@ -34,10 +34,10 @@ local config = {
     -- (ie /posts/<name>/index.html over /posts/<name>.html)
     link_dirs = true,
 
-    -- Generate pages at /page/<name>
-    pages_dir = 'page',
-    -- Generate posts at /post/<name>
-    posts_dir = 'post',
+    -- Generate pages at /pages/<name>
+    pages_dir = 'pages',
+    -- Generate posts at /posts/<name>
+    posts_dir = 'posts',
 
     -- Select a page as the landing page (optional, no path or suffix)
     -- this will only come into effect if there are no posts (see force_index below).
