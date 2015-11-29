@@ -154,6 +154,9 @@ local function _process_content(s, item)
     end
     s = s:gsub('%$[%w]+=.-\n', '')
 
+    -- Swap out XREFs
+    s = s:gsub('%[=(.-)%]', '[XREF=%1]')
+
     -- Hande plugins
     s = _process_plugins(s, item)
 
@@ -322,21 +325,28 @@ local function process_xref_1(fname, s, idx)
     local pos = 1
 
     while pos < #s do
-    local a, b = s:find('%[=(.-)%]', pos)
-    if not a then break end
-    local ref = s:sub(a + 2, b - 1)
-    local res = idx[ref]
-    if not res then
-        print(string.format("%s: Error: cross reference to %s not found.",
-        fname, ref))
-        res = "INVALID XREF"
-    else
-        res = string.format('<a href="%s/%s/%s">%s</a>',
-        config.url, res.directory, res.link, res.title)
-    end
+        local a, b = s:find('%[XREF=(.-)%]', pos)
+        if not a then break end
 
-    s = s:sub(1, a - 1) .. res .. s:sub(b + 1)
-    pos = a + #res
+        local ref = s:sub(a + 2, b - 1)
+        local res = idx[ref]
+
+        if not res then
+            print(string.format(
+                '%s: Error: cross reference to %s not found.',
+                fname, ref
+            ))
+
+            res = 'INVALID XREF'
+        else
+            res = string.format(
+                '<a href="%s/%s/%s">%s</a>',
+                config.url, res.directory, res.link, res.title
+            )
+        end
+
+        s = s:sub(1, a - 1) .. res .. s:sub(b + 1)
+        pos = a + #res
     end
 
     return s
@@ -356,21 +366,23 @@ local function process_xref(pages, posts)
     -- create an index (name to item)
     local idx = {}
     for _, item in ipairs(pages) do
-    idx['pages/' .. item.name] = item
+        idx['pages/' .. item.name] = item
     end
+
     for _, item in ipairs(posts) do
-    idx['posts/' .. item.name] = item
+        idx['posts/' .. item.name] = item
     end
 
     -- check all items for xrefs
     for _, item in ipairs(pages) do
-    item.content = process_xref_1(item.source, item.content, idx)
-    if item.excerpt then
-        item.excerpt = process_xref_1(item.source, item.excerpt, idx)
+        item.content = process_xref_1(item.source, item.content, idx)
+        if item.excerpt then
+            item.excerpt = process_xref_1(item.source, item.excerpt, idx)
+        end
     end
-    end
+
     for _, item in ipairs(posts) do
-    item.content = process_xref_1(item.source, item.content, idx)
+        item.content = process_xref_1(item.source, item.content, idx)
     end
 
 end
