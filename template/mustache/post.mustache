@@ -1,0 +1,31 @@
+<div class="post">
+    <h2>
+      {{#single}}
+          {{post.title}}
+      {{/single}}
+      {{^single}}
+          <a href="{{{url}}}/{{{config.posts_dir}}}/{{{post.link}}}">
+            {{post.title}}
+          </a>
+      {{/single}}
+    </h2>
+    <div class="content">
+
+        {{#post.excerpt}}
+            {{^single}}
+                {{{post.excerpt}}}
+                <a href="{{{url}}}/{{{config.posts_dir}}}/{{{post.link}}}#more">Read more &rarr;</a>
+            {{/single}}
+            {{#single}}
+                {{{post.content}}}
+            {{/single}}
+        {{/post.excerpt}}
+
+        {{^post.excerpt}}
+            {{{post.content}}}
+        {{/post.excerpt}}
+    </div>
+    <div class="meta">
+        {{#format_date}}{{post.time}}{{/format_date}}
+    </div>
+</div>

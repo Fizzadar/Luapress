@@ -77,7 +77,7 @@ local function build_index(pages, posts, templates)
         -- We have a sticky page, attach it to the first index.html before any posts
         if sticky_page then
             template:set('page', sticky_page)
-            output = output .. template:process(templates.page)
+            output = output .. template:process(config.template_type, templates.page)
 
         -- Error if the sticky page doesn't exist
         else
@@ -89,7 +89,7 @@ local function build_index(pages, posts, templates)
     for k, post in ipairs(posts) do
         -- Add post to output, increase count
         template:set('post', post)
-        output = output .. template:process(templates.post)
+        output = output .. template:process(config.template_type, templates.post)
         count = count + 1
 
         -- If we have n posts or are on last post, create current index, reset
@@ -127,7 +127,7 @@ local function build_index(pages, posts, templates)
             end
 
             -- Create and write output
-            output = template:process(templates.header) .. output .. template:process(templates.footer)
+            output = template:process(config.template_type, templates.header) .. output .. template:process(config.template_type, templates.footer)
             local result, err = f:write(output)
             if not result then cli.error(err) end
             f:close()
@@ -171,7 +171,7 @@ local function build_rss(posts, templates)
     end
 
     template:set('posts', rssposts)
-    local rss = template:process(templates.rss)
+    local rss = template:process(config.template_type, templates.rss)
     local f, err = io.open(config.root .. '/' .. config.build_dir .. '/index.xml', 'w')
     if not f then cli.error(err) end
     local result, err = f:write(rss)
@@ -191,7 +191,7 @@ local function build()
 
     -- Load template files
     if config.print then print('[1] Loading templates') end
-    local templates = util.load_templates()
+    local templates = util.load_templates(config.template_type)
 
     -- Load the posts and sort by timestamp
     if config.print then print('[2] Loading posts') end
@@ -215,7 +215,7 @@ local function build()
             link = 'archive' .. (config.link_dirs and '' or '.html'),
             title = config.archive_title,
             time = os.time(),
-            content = template:process(templates.archive),
+            content = template:process(config.template_type, templates.archive),
             template = 'page',
             directory = config.pages_dir,
             name = 'archive',
@@ -239,7 +239,7 @@ local function build()
 
         -- Attach the post & output the file
         template:set('post', post)
-        util.write_html(dest_file, post, templates)
+        util.write_html(config.template_type, dest_file, post, templates)
     end
 
     -- Build the pages
@@ -254,7 +254,7 @@ local function build()
         template:set('page', page)
 
         -- Output the file
-        util.write_html(dest_file, page, templates)
+        util.write_html(config.template_type, dest_file, page, templates)
     end
     template:set('page', false)
 
@@ -299,7 +299,11 @@ end
 -- @param root  directory where to set up the files
 -- @param url  relative URL of the site, i.e. https://host.com/URL
 --
-local function make_skeleton(root, url)
+local function make_skeleton(root, url, template_type)
+    if not template_type then
+        template_type = 'lhtml'
+    end
+
     -- Make directories
     for _, directory in ipairs({
         '', 'posts', 'pages', 'inc', 'templates', 'templates/default',
@@ -309,7 +313,7 @@ local function make_skeleton(root, url)
 
     -- Copy the default template
     local base = string.gsub(arg[0], "/[^/]-/[^/]-$", "")
-    util.copy_dir(base .. '/template/', root .. '/templates/default/')
+    util.copy_dir(base .. '/template/' .. template_type .. '/', root .. '/templates/default/')
 
     local attributes = lfs.attributes(root .. '/config.lua')
     if attributes then
@@ -319,7 +323,8 @@ local function make_skeleton(root, url)
 
     -- A basic config with just the default environment set to URL
     local basic_config = {
-        url = url
+        url = url,
+        template_type = template_type
     }
 
     -- Convert the default config from Lua table to Lua code

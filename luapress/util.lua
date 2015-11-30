@@ -42,7 +42,7 @@ end
 -- @param object  Descriptor of page or post
 -- @param templates  Table with templates.
 --
-local function write_html(destination, object, templates)
+local function write_html(template_type, destination, object, templates)
     -- If the output file exists and is not older than the input file, skip.
     local attributes = lfs.attributes(destination)
     if config.cache and attributes and object.modification and object.modification <= attributes.modification then
@@ -51,7 +51,7 @@ local function write_html(destination, object, templates)
 
     -- Write the file
     if config.print then print('\t' .. object.title) end
-    local output = template:process(templates.header, templates[object.template], templates.footer)
+    local output = template:process(template_type, templates.header, templates[object.template], templates.footer)
     f, err = io.open(destination, 'w')
     if not f then cli.error(err) end
     local result, err = f:write(output)
@@ -245,13 +245,15 @@ end
 ---
 -- Loads all .lhtml files from a template directory
 --
-local function load_templates()
+local function load_templates(template_type)
     local templates = {}
     local directory = config.root .. '/templates/' .. config.template
+    local extension_sub = -(#template_type)
 
     for file in lfs.dir(directory) do
-        if file:sub(-5) == 'lhtml' then
-            local tmpl_name = file:sub(0, -7)
+        if file:sub(extension_sub) == template_type then
+            -- remove the `.` in the extension
+            local tmpl_name = file:sub(0, extension_sub - 2)
             file = directory .. '/' .. file
             local f, err = io.open(file, 'r')
             if not f then cli.error(err) end
@@ -302,6 +304,8 @@ local function copy_dir(directory, destination)
 
             -- Directory?
             if attributes.mode and attributes.mode == 'directory' then
+                print(directory .. file .. '/')
+                print(destination .. file .. '/')
                 -- Ensure destination directory
                 if not io.open(destination .. file, 'r') then
                     lfs.mkdir(destination .. file)

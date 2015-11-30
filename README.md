@@ -12,9 +12,11 @@ luarocks install luapress
 ```
 
 Create a new site in some directory:
+(You can optionally specify `lhtml` or `mustache` for templates; default if left
+undefined is `lhtml`)
 
 ```
-luapress init URL
+luapress init URL [lhtml|mustache]
 ```
 
 Drop Markdown files in `posts/` & `pages/` and build with:
