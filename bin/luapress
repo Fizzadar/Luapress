@@ -92,7 +92,9 @@ if opts.init then
         cli.error('Missing URL parameter, please use: luapress init URL')
     end
 
-    local status, err = luapress.make_skeleton(lfs.currentdir(), url)
+    local template_type = new_arg[2]
+
+    local status, err = luapress.make_skeleton(lfs.currentdir(), url, template_type)
     if err then
         cli.error(err)
     end

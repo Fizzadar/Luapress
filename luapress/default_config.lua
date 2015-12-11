@@ -50,7 +50,10 @@ local config = {
     archive_title = 'Archive',
 
     -- Select a page to appear on index.html before any posts (optional, no path or suffix)
-    sticky_page = nil
+    sticky_page = nil,
+
+    -- Use lhtml parser by default (other options: 'mustache')
+    template_type = 'lhtml',
 }
 
 return config
