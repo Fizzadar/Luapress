@@ -44,7 +44,8 @@ local opts = {
     no_cache = false,
     watch = false,
     help = false,
-    version = false
+    version = false,
+    use_lhtml = false
 }
 
 -- Parse named/boolean opts, capture other opts
@@ -55,7 +56,8 @@ arg_to_opt = {
     ['init'] = 'init',
     ['-h'] = 'help',
     ['--help'] = 'help',
-    ['--version'] = 'version'
+    ['--version'] = 'version',
+    ['--lhtml'] = 'use_lhtml'
 }
 
 for key, value in ipairs(arg) do
@@ -92,9 +94,7 @@ if opts.init then
         cli.error('Missing URL parameter, please use: luapress init URL')
     end
 
-    local template_type = new_arg[2]
-
-    local status, err = luapress.make_skeleton(lfs.currentdir(), url, template_type)
+    local status, err = luapress.make_skeleton(lfs.currentdir(), url, opts.use_lhtml)
     if err then
         cli.error(err)
     end

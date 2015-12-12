@@ -42,7 +42,7 @@ end
 -- @param object  Descriptor of page or post
 -- @param templates  Table with templates.
 --
-local function write_html(template_type, destination, object, templates)
+local function write_html(destination, object, templates)
     -- If the output file exists and is not older than the input file, skip.
     local attributes = lfs.attributes(destination)
     if config.cache and attributes and object.modification and object.modification <= attributes.modification then
@@ -51,7 +51,7 @@ local function write_html(template_type, destination, object, templates)
 
     -- Write the file
     if config.print then print('\t' .. object.title) end
-    local output = template:process(template_type, templates.header, templates[object.template], templates.footer)
+    local output = template:process(templates.header, templates[object.template], templates.footer)
     f, err = io.open(destination, 'w')
     if not f then cli.error(err) end
     local result, err = f:write(output)
@@ -243,25 +243,39 @@ end
 
 
 ---
--- Loads all .lhtml files from a template directory
+-- Loads all .mustache & .lhtml files from a template directory
 --
-local function load_templates(template_type)
+local function load_templates()
     local templates = {}
     local directory = config.root .. '/templates/' .. config.template
-    local extension_sub = -(#template_type)
 
     for file in lfs.dir(directory) do
-        if file:sub(extension_sub) == template_type then
-            -- remove the `.` in the extension
-            local tmpl_name = file:sub(0, extension_sub - 2)
-            file = directory .. '/' .. file
-            local f, err = io.open(file, 'r')
-            if not f then cli.error(err) end
-            local s, err = f:read('*a')
-            if not s then cli.error(err) end
-            f:close()
+        -- Mustache templates take prioritry
+        for _, extension in pairs({'mustache', 'lhtml'}) do
+            if file:sub(-#extension) == extension then
+                local tmpl_name = file:sub(0, -(#extension + 2))
 
-            templates[tmpl_name] = s
+                -- Fail if two templates with the same name exist
+                -- (ie header.[mustache|lhtml])
+                if templates[tmpl_name] then
+                    cli.error('Duplicate template: ' .. tmpl_name)
+                end
+
+                local filename = directory .. '/' .. file
+
+                -- Open & read the file
+                local f, err = io.open(filename, 'r')
+                if not f then cli.error(err) end
+                local s, err = f:read('*a')
+                if not s then cli.error(err) end
+                f:close()
+
+                -- Set the template
+                templates[tmpl_name] = {
+                    content = s,
+                    format = extension
+                }
+            end
         end
     end
 
@@ -329,10 +343,10 @@ local function process_xref_1(fname, s, idx)
     local pos = 1
 
     while pos < #s do
-        local a, b = s:find('%[XREF=(.-)%]', pos)
+        local a, b = s:find('%[XREF=.-%]', pos)
         if not a then break end
 
-        local ref = s:sub(a + 2, b - 1)
+        local ref = s:sub(a + 6, b - 1)
         local res = idx[ref]
 
         if not res then
