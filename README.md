@@ -1,4 +1,4 @@
-# Luapress v3.0
+# Luapress v3.1
 
 Luapress is *yet another* static site generator, written in Lua, with posts in markdown. It's simple, fast and supports both plugins and templates.
 
@@ -11,12 +11,10 @@ Install with Luarocks:
 luarocks install luapress
 ```
 
-Create a new site in some directory:
-(You can optionally specify `lhtml` or `mustache` for templates; default if left
-undefined is `lhtml`)
+Create a new site in some directory (you can optionally specify `--lhtml` to use the LHTML default template over the mustache one):
 
 ```
-luapress init URL [lhtml|mustache]
+luapress init URL [--lhtml]
 ```
 
 Drop Markdown files in `posts/` & `pages/` and build with:
