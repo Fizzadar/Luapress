@@ -1,9 +1,9 @@
 package = 'Luapress'
-version = '3.0-0'
+version = '3.1-0'
 
 source = {
     url = 'git://github.com/Fizzadar/Luapress.git',
-    tag = 'v3.0'
+    tag = 'v3.1'
 }
 
 description = {
@@ -15,6 +15,7 @@ description = {
 dependencies = {
     'lua >= 5.1',
     'luafilesystem',
+    'lustache',
     'ansicolors'
 }
 

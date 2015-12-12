@@ -1,3 +1,10 @@
+# v3.1
+
++ Add support for `.mustache` templates
++ Default new sites to use `.mustache` build in template
++ Add `--lhtml` flag to init to create sites with the old `.lhtml` template
++ Fix `.lhtml` templates which print '-'
+
 # v3.0
 
 Breaking:
