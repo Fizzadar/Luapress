@@ -3,8 +3,8 @@
 
 local config = {
     url = '/tests/directories/build',
-    posts_dir = 'posts',
-    pages_dir = 'pages',
+    posts_dir = 'post',
+    pages_dir = 'page',
     archive_title = 'Old Posts'
 }
 

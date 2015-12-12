@@ -1,6 +1,6 @@
 #!/bin/sh
 
-TESTS=("blog" "gallery" "index" "directories" "envs" "sticky")
+TESTS=("blog" "gallery" "index" "directories" "envs" "sticky" "lhtml")
 
 
 # Exit on error
@@ -27,7 +27,7 @@ for TEST in ${TESTS[*]}; do
                 rm -rf build/
             fi
 
-            # Autogenerate config.lua & build siote
+            # Autogenerate config.lua & build site
             luapress init "/tests/$TEST/build"
             luapress --no-cache
         fi
