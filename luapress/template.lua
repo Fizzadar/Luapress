@@ -39,7 +39,7 @@ function process_lhtml(code)
     -- Prepend bits
     code = 'local self, output = require(\'luapress.template\'), ""\noutput = output .. [[' .. code
     -- Replace <?=vars?>
-    code = code:gsub('<%?=([,/_\'%[%]%%%:%.%a%s%(%)]+)%s%?>', ']] .. self:toString( %1 ) .. [[')
+    code = code:gsub('<%?=([,/_\'%-%[%]%%%:%.%a%s%(%)]+)%s%?>', ']] .. self:toString( %1 ) .. [[')
     -- Replace <? to close output, start raw lua
     code = code:gsub('<%?%s', ']] ')
     -- Replace ?> to stop lua and start output (in table)
