@@ -304,7 +304,7 @@ local function copy_file(source, destination)
     if not result then cli.error(err) end
     f:close()
 
-    print('\t' .. destination)
+    if config.print then print('\t' .. destination) end
 end
 
 
@@ -318,8 +318,6 @@ local function copy_dir(directory, destination)
 
             -- Directory?
             if attributes.mode and attributes.mode == 'directory' then
-                print(directory .. file .. '/')
-                print(destination .. file .. '/')
                 -- Ensure destination directory
                 if not io.open(destination .. file, 'r') then
                     lfs.mkdir(destination .. file)
