@@ -135,7 +135,7 @@ local function build_index(pages, posts, templates)
             -- Reset & close f
             count = 0
             output = ''
-            if config.print then print('\tindex ' .. index) end
+            print('\tindex ' .. index)
             index = index + 1
         end
     end
@@ -150,7 +150,7 @@ local function build_rss(posts, templates)
         return
     end
 
-    if config.print then print('[7] Building RSS') end
+    print('[7] Building RSS')
     local rssposts = {}
 
     for k, post in ipairs(posts) do
@@ -190,18 +190,18 @@ local function build()
     template:set('config', config)
 
     -- Load template files
-    if config.print then print('[1] Loading templates') end
+    print('[1] Loading templates')
     local templates = util.load_templates()
 
     -- Load the posts and sort by timestamp
-    if config.print then print('[2] Loading posts') end
+    print('[2] Loading posts')
     local posts = util.load_markdowns('posts', 'post')
     table.sort(posts, function(a, b)
         return tonumber(a.time) > tonumber(b.time)
     end)
 
     -- Load the pages and sort by order
-    if config.print then print('[3] Loading pages') end
+    print('[3] Loading pages')
     local pages = util.load_markdowns('pages', 'page')
     table.sort(pages, function(a, b)
         return (tonumber(a.order) or 0) < (tonumber(b.order) or 0)
@@ -229,7 +229,7 @@ local function build()
     template:set('have_posts', #posts > 0)
 
     -- Build the posts
-    if config.print then print('[4] Building ' .. (config.cache and 'new ' or '') .. 'posts') end
+    print('[4] Building ' .. (config.cache and 'new ' or '') .. 'posts')
     template:set('single', true)
     -- Page links shared between all posts
     template:set('page_links', util.page_links(pages, nil))
@@ -243,7 +243,7 @@ local function build()
     end
 
     -- Build the pages
-    if config.print then print('[5] Building ' .. (config.cache and 'new ' or '') .. 'pages') end
+    print('[5] Building ' .. (config.cache and 'new ' or '') .. 'pages')
     template:set('single', false)
 
     for _, page in ipairs(pages) do
@@ -259,7 +259,7 @@ local function build()
     template:set('page', false)
 
     -- Build the indexes
-    if config.print then print('[6] Building index pages') end
+    print('[6] Building index pages')
     -- Page links shared between all indexes
     template:set('page_links', util.page_links(pages, nil))
 
@@ -270,7 +270,7 @@ local function build()
     build_rss(posts, templates)
 
     -- Copy inc directories
-    if config.print then print('[8] Copying inc files') end
+    print('[8] Copying inc files')
     util.copy_dir(config.root .. '/inc/', config.root .. '/' .. config.build_dir .. '/inc/')
     util.copy_dir(
         config.root .. '/templates/' .. config.template .. '/inc/',
