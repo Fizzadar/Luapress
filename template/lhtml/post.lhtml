@@ -10,5 +10,5 @@
         <?=self:get('post').content ?>
     <? end ?>
     </div>
-    <div class="meta"><?=os.date('%a, %d %B, %Y', self:get('post').time) ?></div>
+    <div class="meta"><?=self.format_date(self:get('post').time) ?></div>
 </div>

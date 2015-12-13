@@ -52,8 +52,8 @@ local config = {
     -- Select a page to appear on index.html before any posts (optional, no path or suffix)
     sticky_page = nil,
 
-    -- Use lhtml parser by default (other options: 'mustache')
-    template_type = 'lhtml',
+    -- Lua date format for template.format_date
+    date_format = '%a, %d %B, %Y'
 }
 
 return config

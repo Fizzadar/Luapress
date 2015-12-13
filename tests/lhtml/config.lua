@@ -4,7 +4,8 @@
 -- github.com/Fizzadar/Luapress/blob/develop/luapress/default_config.lua
 
 local config = {
-    url = '/tests/lhtml/build'
+    url = '/tests/lhtml/build',
+    date_format = '%a %d %B %Y'
 }
 
 return config
