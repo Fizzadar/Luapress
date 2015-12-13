@@ -1,3 +1,9 @@
+# v3.2
+
++ `--watch` now looks for template changes
++ Add consistent `format_date` function for both mustache/lhtml templates:
++ Add `config.date_format`
+
 # v3.1
 
 + Add support for `.mustache` templates
