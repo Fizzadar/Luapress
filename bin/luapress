@@ -219,7 +219,10 @@ else
         end
 
         local watch_directory = require('luapress.lib.watch_directory')
-        watch_directory({'posts', 'pages'}, build)
+        watch_directory({
+            'posts', 'pages',
+            'templates/' .. config.template
+        }, build)
 
     -- Normal build
     else
