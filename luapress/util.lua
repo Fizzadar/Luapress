@@ -50,7 +50,7 @@ local function write_html(destination, object, templates)
     end
 
     -- Write the file
-    if config.print then print('\t' .. object.title) end
+    print('\t' .. object.title)
     local output = template:process(templates.header, templates[object.template], templates.footer)
     f, err = io.open(destination, 'w')
     if not f then cli.error(err) end
@@ -234,7 +234,7 @@ local function load_markdowns(directory, template)
 
             -- Insert to items
             items[#items + 1] = item
-            if config.print then print('\t' .. item.title) end
+            print('\t' .. item.title)
         end
     end
 
@@ -304,7 +304,7 @@ local function copy_file(source, destination)
     if not result then cli.error(err) end
     f:close()
 
-    if config.print then print('\t' .. destination) end
+    print('\t' .. destination)
 end
 
 

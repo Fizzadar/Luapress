@@ -164,7 +164,6 @@ else
     end
 
     -- Attach other opts to config
-    config.print = true
     config.root = lfs.currentdir()
     -- Cache - will set to false below if url changes between runs
     config.cache = not opts.no_cache
