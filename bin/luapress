@@ -136,11 +136,11 @@ else
     -- Get the default config, apply them to config
     local default_config = require('luapress.default_config')
     for key, value in pairs(default_config) do
-        if not config[key] then
+        if config[key] == nil then
             config[key] = value
         end
     end
-
+    
     -- If url is set via args, it overrides all
     if url then
         config.url = url
