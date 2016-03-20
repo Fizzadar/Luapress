@@ -234,12 +234,38 @@ local function build()
     -- Page links shared between all posts
     template:set('page_links', util.page_links(pages, nil))
 
-    for _, post in ipairs(posts) do
-        local dest_file = util.ensure_destination(post)
-
-        -- Attach the post & output the file
-        template:set('post', post)
-        util.write_html(dest_file, post, templates)
+    template:set('previous_post', false)
+    template:set('next_post', false)
+    
+    for k, post in ipairs(posts) do
+	-- Work out next post
+	if #posts > k then
+	  template:set('next_post', config.posts_dir .. '/' .. post.link )
+	else
+	    -- we are last post
+	  template:set('next_post', false)
+	end
+	if k > 1 then -- second iteration and on
+	  local dest_file = util.ensure_destination(prevpost)
+	  -- Attach the post & output the file
+	  template:set('post', prevpost)
+	  util.write_html(dest_file, prevpost, templates) -- write file for previous post
+	end
+	-- Attach the post & output the file
+	template:set('post', post)
+	if #posts == 1 then -- only one post available
+	  local dest_file = util.ensure_destination(post)
+	  util.write_html(dest_file, post, templates)
+	end
+	if #posts == k then -- last post
+	  local dest_file = util.ensure_destination(post)
+	  util.write_html(dest_file, post, templates)
+	end
+	-- Work out previous post
+	if k > 1 then
+	  template:set('previous_post', config.posts_dir .. '/' .. prevpost.link )
+	end
+	prevpost = post
     end
 
     -- Build the pages
