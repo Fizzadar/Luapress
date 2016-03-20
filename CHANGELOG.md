@@ -1,3 +1,8 @@
+# v3.3
+
++ Add `previous_post` and `next_post` template variables for posts
++ Fix `config.link_dirs` when set to `false`
+
 # v3.2
 
 + `--watch` now looks for template changes
