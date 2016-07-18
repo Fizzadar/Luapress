@@ -6,6 +6,9 @@ TESTS=("blog" "gallery" "index" "directories" "envs" "sticky" "lhtml")
 # Exit on error
 set -e
 
+# Update local version
+luarocks make
+
 # Loop the tests
 for TEST in ${TESTS[*]}; do
     # Filter by first arg if provided
