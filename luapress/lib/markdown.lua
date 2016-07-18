@@ -877,24 +877,24 @@ end
 -- Handle image references
 function markdown.images(text)
     local function reference_link(alt, id)
-        alt = encode_alt(alt:match("%b[]"):sub(2,-2))
+        alt = markdown.encode_alt(alt:match("%b[]"):sub(2,-2))
         id = id:match("%[(.*)%]"):lower()
         if id == "" then id = text:lower() end
         link_database[id] = link_database[id] or {}
         if not link_database[id].url then return nil end
         local url = link_database[id].url or id
-        url = encode_alt(url)
-        local title = encode_alt(link_database[id].title)
+        url = markdown.encode_alt(url)
+        local title = markdown.encode_alt(link_database[id].title)
         if title then title = " title=\"" .. title .. "\"" else title = "" end
         return markdown.add_escape ('<img src="' .. url .. '" alt="' .. alt .. '"' .. title .. "/>")
     end
 
     local function inline_link(alt, link)
-        alt = encode_alt(alt:match("%b[]"):sub(2,-2))
+        alt = markdown.encode_alt(alt:match("%b[]"):sub(2,-2))
         local url, title = link:match("%(<?(.-)>?[ \t]*['\"](.+)['\"]")
         url = url or link:match("%(<?(.-)>?%)")
-        url = encode_alt(url)
-        title = encode_alt(title)
+        url = markdown.encode_alt(url)
+        title = markdown.encode_alt(title)
         if title then
             return markdown.add_escape('<img src="' .. url .. '" alt="' .. alt .. '" title="' .. title .. '"/>')
         else
@@ -973,7 +973,7 @@ function markdown.auto_links(text)
         return out
     end
     local function mail(s)
-        s = unescape_special_chars(s)
+        s = markdown.unescape_special_chars(s)
         local address = encode_email_address("mailto:" .. s)
         local text = encode_email_address(s)
         return markdown.add_escape("<a href=\"" .. address .. "\">") .. text .. "</a>"
