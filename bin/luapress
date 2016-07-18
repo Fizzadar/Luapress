@@ -140,7 +140,7 @@ else
             config[key] = value
         end
     end
-    
+
     -- If url is set via args, it overrides all
     if url then
         config.url = url
@@ -170,17 +170,24 @@ else
     -- location of the bin directory (probably /usr/local/lib/luarocks/rocks/luapress/*/)
     config.base = arg[0]:gsub('/[^/]-/[^/]-$', '')
 
+    -- Work out the cache filename
+    local cache_file = '.luapress'
+    print('ENV', env)
+    if env then
+        cache_file = cache_file .. '_' .. env
+    end
+
     -- Read the "previous url" from the cache file
-    local f, err = io.open('.luapress', 'r')
+    local f, err = io.open(cache_file, 'r')
     if f then
         url, err = f:read('*a')
         if err then
-            cli.error('Could not read cache file .luapress: ' .. err)
+            cli.error('Could not read cache file ' .. cache_file .. ': ' .. err)
         end
 
         -- If the url is new, no caching
         if url ~= config.url then
-            cli.log('Disabling cache as url in .luapress different')
+            cli.log('Disabling cache as url in ' .. cache_file .. ' different')
             config.cache = false
         end
 
@@ -198,7 +205,7 @@ else
         end
 
         -- Save the url to the local cache file
-        local f, err = io.open('.luapress', 'w')
+        local f, err = io.open(cache_file, 'w')
         if f then
             f:write(config.url)
             f:close()
