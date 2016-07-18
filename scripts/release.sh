@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Exit on error
+set -x
+
 echo "### Luapress"
 
 VERSION=`cat luapress/config.lua | grep version | grep -oEi "[0-9]+\.[0-9]+\.?[0-9]*"`
@@ -10,6 +13,10 @@ if [ ! -f $ROCKSPEC ]; then
     echo "--> Missing rockspec: ${ROCKSPEC}"
     exit 1
 fi
+
+# Ensure tests pass
+echo "--> Running tests..."
+scripts/test.sh
 
 echo "--> Releasing: v$VERSION"
 
