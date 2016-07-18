@@ -1,3 +1,7 @@
+# v3.3.1
+
++ Fix images and emails in markdown
+
 # v3.3
 
 + Add `previous_post` and `next_post` template variables for posts
