@@ -5,7 +5,7 @@
 local ipairs = ipairs
 local type = type
 local tostring = tostring
-local loadstring = loadstring
+local loadstring = loadstring or load
 
 local mustache = require('lustache')
 
