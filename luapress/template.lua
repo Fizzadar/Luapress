@@ -80,7 +80,13 @@ function process_lhtml(code)
     -- Close final output and return concat of the table
     code = code .. ' \n]]\nreturn output'
 
-    return loadstring(code)()
+    local f, err = loadstring(code)
+    if not f then
+        print(err, code)
+        return ''
+    else
+        return f()
+    end
 end
 
 
