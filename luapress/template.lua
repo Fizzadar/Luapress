@@ -67,7 +67,7 @@ function process_lhtml(code)
 
     -- Replace <?=vars?>
     code = code:gsub(
-        '<%?=([,/_\'%-%[%]%%%:%.%a%s%(%)]+)%s%?>',
+        '<%?=(.-)%?>',
         ']] .. self.tostring( %1 ) .. [['
     )
 
