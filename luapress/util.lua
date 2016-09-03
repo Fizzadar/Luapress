@@ -202,6 +202,9 @@ local function load_markdowns(directory, template)
 
             -- Work out link
             local link = fname:gsub(' ', '_'):gsub('[^_aA-zZ0-9]', '')
+            if string.len(link) == 0 then
+              link = fname
+            end
             if not config.link_dirs then
                 link = link .. '.html'
             end
