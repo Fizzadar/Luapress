@@ -201,7 +201,7 @@ local function load_markdowns(directory, template)
             local attributes = lfs.attributes(file2)
 
             -- Work out link
-            local link = fname:gsub(' ', '_'):gsub('[^_aA-zZ0-9]', '')
+            local link = fname:gsub(' ', '_')
             if not config.link_dirs then
                 link = link .. '.html'
             end
