@@ -195,8 +195,20 @@ local function load_markdowns(directory, template)
     local out_directory = config[directory .. '_dir']
 
     for file in lfs.dir(config.root .. "/" .. directory) do
+        local supported_file = false
+        local fname = nil
+
         if file:sub(-3) == '.md' then
-            local fname = file:sub(0, -4)
+          supported_file = true
+          fname = file:sub(0, -4)
+        end
+       
+        if file:sub(-9) == '.markdown' then
+          supported_file = true
+          fname = file:sub(0, -10)
+        end 
+
+        if supported_file then
             local file2 = config.root .. "/" .. directory .. '/' .. file
             local attributes = lfs.attributes(file2)
 
