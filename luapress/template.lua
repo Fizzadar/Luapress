@@ -70,6 +70,9 @@ function process_lhtml(code)
         '<%?=(.-)%?>',
         ']] .. self.tostring( %1 ) .. [['
     )
+    
+    -- Replace ?>  <? spaces and lines between lua codes
+    code = code:gsub('%?>[ \n]*<%?', '\n')
 
     -- Replace <? to close output, start raw lua
     code = code:gsub('<%?%s', ']] ')
