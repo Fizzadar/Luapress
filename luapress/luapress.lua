@@ -340,8 +340,9 @@ local function make_skeleton(root, url, use_lhtml)
     end
 
     -- Copy the default template
-    local base = string.gsub(arg[0], "/[^/]-/[^/]-$", "")
-    util.copy_dir(base .. '/template/' .. template_type .. '/', root .. '/templates/default/')
+    local directory = arg[0] .. '/../../template/' .. template_type .. '/'
+    local destination = root .. '/templates/default/'
+    util.copy_dir(directory, destination)
 
     local attributes = lfs.attributes(root .. '/config.lua')
     if attributes then
