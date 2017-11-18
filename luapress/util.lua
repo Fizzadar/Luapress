@@ -10,11 +10,18 @@ local error = error
 local table = table
 local string = string
 
+local discount = require('discount')
 local lfs = require('lfs')
 
 local template = require('luapress.template')
-local markdown = require('luapress.lib.markdown')
 local cli = require('luapress.lib.cli')
+
+
+-- Turns a string into markdown using discount
+local function markdown(s)
+    local data = discount.compile(s, 'fencedcode')
+    return data.body
+end
 
 
 --

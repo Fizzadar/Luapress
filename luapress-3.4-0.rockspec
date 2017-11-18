@@ -13,10 +13,14 @@ description = {
 }
 
 dependencies = {
+    -- Lua itself!
     'lua >= 5.1',
+
+    -- Packages
+    'ansicolors',
+    'discount',
     'luafilesystem',
     'lustache',
-    'ansicolors'
 }
 
 build = {
