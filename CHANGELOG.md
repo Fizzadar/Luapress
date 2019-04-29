@@ -1,3 +1,12 @@
+# 3.5
+
++ Replace `markdown.lua` with `lua-discount`
++ Add `discount_options` configuration setting
++ Remove caching/`--no-cache` over-optimisation
++ Lua 5.3+ support
++ Support for `.markdown` files
++ Fixes for copying directory on Windows
+
 # v3.4
 
 + Support for newer Lua versions
