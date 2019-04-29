@@ -11,6 +11,7 @@ local pairs = pairs
 local ipairs = ipairs
 
 local luapress_config = require('luapress.config')
+local util = require('luapress.util')
 local cli = require('luapress.lib.cli')
 
 local help_doc = [[
@@ -163,7 +164,7 @@ else
     -- Attach other opts to config
     config.root = lfs.currentdir()
     -- location of the bin directory (probably /usr/local/lib/luarocks/rocks/luapress/*/)
-    config.base = arg[0]:gsub('/[^/]-/[^/]-$', '')
+    config.base = util.get_install_dir()
 
     -- Ensure the build directory
     luapress.make_build()

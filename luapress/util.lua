@@ -17,6 +17,12 @@ local template = require('luapress.template')
 local cli = require('luapress.lib.cli')
 
 
+-- Get the Luapress install directory (where being executed from)
+local function get_install_dir()
+    return arg[0]:gsub('/[^/]-/[^/]-$', '')
+end
+
+
 -- Turns a string into markdown using discount
 local function markdown(s)
     local data = discount.compile(s, table.unpack(config.discount_options))
@@ -426,5 +432,6 @@ return {
     ensure_destination = ensure_destination,
     write_html = write_html,
     process_xref = process_xref,
-    escape_for_rss = escape_for_rss
+    escape_for_rss = escape_for_rss,
+    get_install_dir = get_install_dir,
 }

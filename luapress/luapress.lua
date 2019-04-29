@@ -340,7 +340,7 @@ local function make_skeleton(root, url, use_lhtml)
     end
 
     -- Copy the default template
-    local directory = arg[0] .. '/../../template/' .. template_type .. '/'
+    local directory = util.get_install_dir() .. '/template/' .. template_type .. '/'
     local destination = root .. '/templates/default/'
     util.copy_dir(directory, destination)
 
