@@ -32,7 +32,7 @@ for TEST in ${TESTS[*]}; do
 
             # Autogenerate config.lua & build site
             luapress init "/tests/$TEST/build"
-            luapress --no-cache
+            luapress
         fi
 
         # Back up to Luapress root

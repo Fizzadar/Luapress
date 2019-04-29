@@ -2,5 +2,5 @@
 rm -rf build/ another_build/
 
 # Build with each env
-luapress default --no-cache
-luapress dev --no-cache
+luapress default
+luapress dev

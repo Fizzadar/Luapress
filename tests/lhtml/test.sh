@@ -5,4 +5,4 @@ rm -rf build/
 luapress init "/tests/lhtml/build" --lhtml
 
 # Build as normal
-luapress --no-cache
+luapress

@@ -28,7 +28,6 @@ Options:
     URL           Build with a different base url.
     init          Start new blog in the current directory.
     URL           Default base URL for the new blog.
-    --no-cache    Rewrite everything, ignoring update times.
     --watch       Watch post/page changes and rebuild each time.
     -h --help     Show this help screen.
     --version     Show version.]]
@@ -41,7 +40,6 @@ local opts = {
     url = nil,
     -- Booleans for arg_to_opt below
     init = false,
-    no_cache = false,
     watch = false,
     help = false,
     version = false,
@@ -51,7 +49,6 @@ local opts = {
 -- Parse named/boolean opts, capture other opts
 new_arg = {}
 arg_to_opt = {
-    ['--no-cache'] = 'no_cache',
     ['--watch'] = 'watch',
     ['init'] = 'init',
     ['-h'] = 'help',
@@ -165,34 +162,8 @@ else
 
     -- Attach other opts to config
     config.root = lfs.currentdir()
-    -- Cache - will set to false below if url changes between runs
-    config.cache = not opts.no_cache
     -- location of the bin directory (probably /usr/local/lib/luarocks/rocks/luapress/*/)
     config.base = arg[0]:gsub('/[^/]-/[^/]-$', '')
-
-    -- Work out the cache filename
-    local cache_file = '.luapress'
-    print('ENV', env)
-    if env then
-        cache_file = cache_file .. '_' .. env
-    end
-
-    -- Read the "previous url" from the cache file
-    local f, err = io.open(cache_file, 'r')
-    if f then
-        url, err = f:read('*a')
-        if err then
-            cli.error('Could not read cache file ' .. cache_file .. ': ' .. err)
-        end
-
-        -- If the url is new, no caching
-        if url ~= config.url then
-            cli.log('Disabling cache as url in ' .. cache_file .. ' different')
-            config.cache = false
-        end
-
-        f:close()
-    end
 
     -- Ensure the build directory
     luapress.make_build()
@@ -202,13 +173,6 @@ else
         local status, err = luapress.build()
         if err then
             cli.error(err)
-        end
-
-        -- Save the url to the local cache file
-        local f, err = io.open(cache_file, 'w')
-        if f then
-            f:write(config.url)
-            f:close()
         end
 
         print()

@@ -50,13 +50,6 @@ end
 -- @param templates  Table with templates.
 --
 local function write_html(destination, object, templates)
-    -- If the output file exists and is not older than the input file, skip.
-    local attributes = lfs.attributes(destination)
-    if config.cache and attributes and object.modification and object.modification <= attributes.modification then
-    return
-    end
-
-    -- Write the file
     print('\t' .. object.title)
     local output = template:process(templates.header, templates[object.template], templates.footer)
     f, err = io.open(destination, 'w')

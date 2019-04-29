@@ -229,14 +229,14 @@ local function build()
     template:set('have_posts', #posts > 0)
 
     -- Build the posts
-    print('[4] Building ' .. (config.cache and 'new ' or '') .. 'posts')
+    print('[4] Building posts')
     template:set('single', true)
     -- Page links shared between all posts
     template:set('page_links', util.page_links(pages, nil))
 
     template:set('previous_post', false)
     template:set('next_post', false)
-    
+
     for k, post in ipairs(posts) do
         -- Work out next post
         if #posts > k then
@@ -269,7 +269,7 @@ local function build()
     end
 
     -- Build the pages
-    print('[5] Building ' .. (config.cache and 'new ' or '') .. 'pages')
+    print('[5] Building pages')
     template:set('single', false)
 
     for _, page in ipairs(pages) do
