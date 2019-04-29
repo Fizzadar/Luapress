@@ -114,9 +114,12 @@ local function _process_plugins(s, out)
         cli.error('Empty plugin call in ' .. out.source)
     end
 
+    -- Support for Lua 5.3+
+    local load_func = loadstring or load
+
     -- convert args to a table
     if #arg > 0 then
-        arg = loadstring("return { " .. arg .. "}")()
+        arg = load_func("return { " .. arg .. "}")()
     else
         arg = {}
     end
