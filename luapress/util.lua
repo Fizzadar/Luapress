@@ -19,7 +19,7 @@ local cli = require('luapress.lib.cli')
 
 -- Turns a string into markdown using discount
 local function markdown(s)
-    local data = discount.compile(s, 'fencedcode')
+    local data = discount.compile(s, table.unpack(config.discount_options))
     return data.body
 end
 
@@ -202,11 +202,11 @@ local function load_markdowns(directory, template)
           supported_file = true
           fname = file:sub(0, -4)
         end
-       
+
         if file:sub(-9) == '.markdown' then
           supported_file = true
           fname = file:sub(0, -10)
-        end 
+        end
 
         if supported_file then
             local file2 = config.root .. "/" .. directory .. '/' .. file

@@ -53,7 +53,10 @@ local config = {
     sticky_page = nil,
 
     -- Lua date format for template.format_date
-    date_format = '%a, %d %B, %Y'
+    date_format = '%a, %d %B, %Y',
+
+    -- lua-discount options (https://gitlab.com/craigbarnes/lua-discount#options)
+    discount_options = {'toc', 'extrafootnote', 'fencedcode'},
 }
 
 return config
