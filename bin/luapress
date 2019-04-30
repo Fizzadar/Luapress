@@ -122,6 +122,10 @@ else
         end
     end
 
+    -- Add current path to package.path to ensure Windows will load config.lua
+    -- Must follow this order, to avoid problems with luapress.default_config
+    package.path = package.path..";"..lfs.currentdir()..'/config.lua'
+
     -- Ensure local config file
     local _, err = io.open('config.lua', 'r')
     if err then
