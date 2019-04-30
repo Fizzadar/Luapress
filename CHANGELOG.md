@@ -3,9 +3,11 @@
 + Replace `markdown.lua` with `lua-discount`
 + Add `discount_options` configuration setting
 + Remove caching/`--no-cache` over-optimisation
-+ Lua 5.3+ support
-+ Support for `.markdown` files
-+ Fixes for copying directory on Windows
++ Lua 5.3 support
++ @paragasu Support for `.markdown` files
++ @exelotl fixes for copying template directory on Windows
++ @exelotl fix link to docs
++ @hrsantiago fix break in `lhtml`
 
 # v3.4
 
