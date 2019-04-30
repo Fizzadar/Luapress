@@ -1,3 +1,7 @@
+# 3.5.1
+
++ @yuigoto fix `package.path` on Windows 10
+
 # 3.5
 
 + Replace `markdown.lua` with `lua-discount`
