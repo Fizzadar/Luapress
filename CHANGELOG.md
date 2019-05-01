@@ -1,3 +1,7 @@
+# 3.5.2
+
++ Fix for Lua 5.1 (`unpack` not `table.unpack`)
+
 # 3.5.1
 
 + @yuigoto fix `package.path` on Windows 10
