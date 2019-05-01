@@ -25,7 +25,8 @@ end
 
 -- Turns a string into markdown using discount
 local function markdown(s)
-    local data = discount.compile(s, table.unpack(config.discount_options))
+    local unpack_func = unpack or table.unpack
+    local data = discount.compile(s, unpack_func(config.discount_options))
     return data.body
 end
 
