@@ -11,10 +11,10 @@ Install with Luarocks:
 luarocks install luapress
 ```
 
-Create a new site in some directory (you can optionally specify `--lhtml` to use the LHTML default template over the mustache one):
+Create a new site in some directory (you can optionally specify `--template "etlua"` or `--template "lhtml"` to use the etlua or LHTML default template over the mustache one):
 
 ```
-luapress init URL [--lhtml]
+luapress init URL [--template "etlua"]
 ```
 
 Drop Markdown files in `posts/` & `pages/` and build with:
