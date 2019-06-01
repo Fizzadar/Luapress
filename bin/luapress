@@ -90,11 +90,22 @@ local luapress = require('luapress')
 -- Get and validate template type
 local template_type = 'mustache'
 if opts.custom_template then
-  template_type = new_arg[2]
-  local valid_types = Set {'mustache', 'lhtml', 'etlua'}
-  if not valid_types[template_type] then 
-    cli.error('Invalid template parameter, please specify mustache, lhtml or etlua ')
-  end
+
+    template_type = new_arg[2]
+
+    local is_valid = false
+    local valid_types = {'mustache', 'lhtml', 'etlua'}
+
+    for _, value in ipairs(arg) do
+        if template_type == value then
+            is_valid = true
+            break
+        end
+    end
+
+    if not is_valid then 
+        cli.error('Invalid template parameter, please specify mustache, lhtml or etlua ')
+    end
 end
 
 
