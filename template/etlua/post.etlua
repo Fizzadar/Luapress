@@ -1,0 +1,26 @@
+<div class="post">
+    <h2>
+      <% if single then %>
+          <%= post.title %>
+      <% else %>
+          <a href="<%- url %>/<%- config.posts_dir %>/<%- post.link %>">
+            <%= post.title %>
+          </a>
+      <% end %>
+    </h2>
+    <div class="content">
+        <% if post.excerpt then %>
+            <% if single then %>
+                <%- post.content %>
+            <% else %>
+              <%- post.excerpt %>
+              <a href="<%- url %>/<%- config.posts_dir %>/<%- post.link %>#more">Read more &rarr;</a>
+            <% end %>
+        <% else %>
+            <%- post.content %>
+        <% end %>
+    </div>
+    <div class="meta">
+        <% if format_date then %><%= format_date(post.time) %><% end %>
+    </div>
+</div>

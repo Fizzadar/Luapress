@@ -1,0 +1,6 @@
+<% if posts then %>
+<div class="post">
+    <h2><a href="<%- url %>/<%- config.posts_dir %>/<%- link %>"><%= title %></a></h2>
+    <div class="meta"><% if format_date then %><%= time %><% end %></div>
+</div>
+<% end %>
