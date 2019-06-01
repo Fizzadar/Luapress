@@ -1,6 +1,6 @@
 -- Luapress
 -- File: luapress/template.lua
--- Desc: process .mustache and .lhtml templates
+-- Desc: process .mustache, .etlua and .lhtml templates
 
 local ipairs = ipairs
 local type = type
@@ -8,6 +8,7 @@ local tostring = tostring
 local loadstring = loadstring or load
 
 local mustache = require('lustache')
+local etlua = require('etlua')
 
 
 -- Template data
@@ -48,6 +49,14 @@ function template.format_date(date)
     return os.date(formatter, date)
 end
 
+-- Process a .etlua template with etlua
+function process_etlua(code, data)
+    -- Wrapper around template.format_date
+    data.format_date = function(date)
+        return template.format_date(date)
+    end
+    return etlua.render(code, data)
+end
 
 -- Process a .mustache template with Lustache
 function process_mustache(code, data)
@@ -55,7 +64,6 @@ function process_mustache(code, data)
     data.format_date = function(date, render)
         return template.format_date(render(date))
     end
-
     return mustache:render(code, data)
 end
 
@@ -100,6 +108,8 @@ function template:process(...)
     for _, tmpl in ipairs({...}) do
         if tmpl.format == 'mustache' then
             process = process_mustache
+        elseif tmpl.format == 'etlua' then
+            process = process_etlua
         else
             process = process_lhtml
         end
