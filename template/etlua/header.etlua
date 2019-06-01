@@ -31,7 +31,7 @@
             <ul>
                 <%- page_links %>
                 <% if have_posts then %>
-                    <li><a href="<%- url %>/index.xml">RSS Feed</a></li>
+                <li><a href="<%- url %>/index.xml">RSS Feed</a></li>
                 <% end %>
             </ul>
         </div><!--end header-->

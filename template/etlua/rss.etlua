@@ -4,18 +4,20 @@
       <title><%= title %></title>
       <link><%- url %></link>
 <% if posts then %>
+<% for _,post in ipairs(posts) do %>
       <item>
-        <title><%= title %></title>
+        <title><%= post.title %></title>
           <description>
-          <% if excerpt then %>
-            <%- excerpt %>
+          <% if post.excerpt then %>
+            <%- post.excerpt %>
           <% else %>
-            <%- content %>
+            <%- post.content %>
           <% end %>
           </description>
-          <link><%- url %>/<%- config.posts_dir %>/<%- link %></link>
-          <guid><%- url %>/<%- config.posts_dir %>/<%- link %></guid>
+          <link><%- url %>/<%- config.posts_dir %>/<%- post.link %></link>
+          <guid><%- url %>/<%- config.posts_dir %>/<%- post.link %></guid>
       </item>
+<% end %>
 <% end %>
     </channel>
 </rss>

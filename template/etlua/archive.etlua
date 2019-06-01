@@ -1,6 +1,8 @@
 <% if posts then %>
+<% for _,post in ipairs(posts) do %>
 <div class="post">
-    <h2><a href="<%- url %>/<%- config.posts_dir %>/<%- link %>"><%= title %></a></h2>
-    <div class="meta"><% if format_date then %><%= format_date(time) %><% end %></div>
+    <h2><a href="<%- url %>/<%- config.posts_dir %>/<%- post.link %>"><%= post.title %></a></h2>
+    <div class="meta"><% if format_date then %><%= format_date(post.time) %><% end %></div>
 </div>
+<% end %>
 <% end %>
