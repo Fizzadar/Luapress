@@ -325,13 +325,7 @@ end
 -- @param root  directory where to set up the files
 -- @param url  relative URL of the site, i.e. https://host.com/URL
 --
-local function make_skeleton(root, url, use_lhtml)
-    if use_lhtml then
-        template_type = 'lhtml'
-    else
-        template_type = 'mustache'
-    end
-
+local function make_skeleton(root, url, template_type)
     -- Make directories
     for _, directory in ipairs({
         '', 'posts', 'pages', 'inc', 'templates', 'templates/default',
