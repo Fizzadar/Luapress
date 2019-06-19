@@ -158,7 +158,25 @@ local function _process_content(s, item)
     -- Set $=key's
     s = s:gsub('%$=url', config.url)
 
-    -- Get $key=value's (and remove from string)
+	-- Fetch key data from the posts. There are 3 variations on the key syntax:
+	-- The first version is $key=L'code' for defining lua functions
+	-- The second is $key=L{fields} for defining lua tables
+	-- The last is $key=value
+	-- Nota bene:
+	-- All matches are removed from 's' afterwards
+	-- Variations one and two can span multiple lines
+	-- Quotes do NOT have to be escaped when defining functions
+	-- Now, starting with code...
+    for k, v in s:gmatch('%$([%w]+)=L\'(.-)\'\n') do
+        item[k] = assert(loadstring('return '.. v))()
+    end
+	s = s:gsub('%$[%w]+=L\'.-\'\n', '')
+	-- ...then fields...
+    for k, v in s:gmatch('%$([%w]+)=L(%b{})\n') do
+        item[k] = assert(loadstring('return {'.. v ..'}'))()
+	end
+	s = s:gsub('%$[%w]+=L%b{}\n', '')
+	--Last, values...
     for k, v in s:gmatch('%$([%w]+)=(.-)\n') do
         item[k] = v
     end
