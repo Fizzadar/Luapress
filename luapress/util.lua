@@ -23,6 +23,33 @@ local function get_install_dir()
 end
 
 
+-- Get the Luapress install directory (where being executed from)
+function split(str, sSeparator, nMax, bRegexp)
+   assert(sSeparator ~= '')
+   assert(nMax == nil or nMax >= 1)
+
+   local aRecord = {}
+
+   if str:len() > 0 then
+      local bPlain = not bRegexp
+      nMax = nMax or -1
+
+      local nField, nStart = 1, 1
+      local nFirst,nLast = str:find(sSeparator, nStart, bPlain)
+      while nFirst and nMax ~= 0 do
+         aRecord[nField] = str:sub(nStart, nFirst-1)
+         nField = nField+1
+         nStart = nLast+1
+         nFirst,nLast = str:find(sSeparator, nStart, bPlain)
+         nMax = nMax-1
+      end
+      aRecord[nField] = str:sub(nStart)
+   end
+
+   return aRecord
+end
+
+
 -- Turns a string into markdown using discount
 local function markdown(s)
     local unpack_func = unpack or table.unpack
@@ -158,11 +185,16 @@ local function _process_content(s, item)
     -- Set $=key's
     s = s:gsub('%$=url', config.url)
 
-    -- Get $key=value's (and remove from string)
-    for k, v in s:gmatch('%$([%w]+)=(.-)\n') do
+    -- Get $key=value's (at the top of the file) and remove from string
+    lines = split(s, '\n')
+    for i, line in ipairs(lines) do
+        k, v = line:match('%$([%w]+)=(.+)')
+        if not k then  -- break on the first non-matching line (variables at top!)
+            break
+        end
         item[k] = v
+        s = s:gsub(line .. '\n', '')
     end
-    s = s:gsub('%$[%w]+=.-\n', '')
 
     -- Swap out XREFs
     s = s:gsub('%[=(.-)%]', '[XREF=%1]')
