@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!--meta-->
+    <title>
+      <% if single then %><%= post.title %> - <% end %>
+      <% if page then %><%= title %> - <% end %>
+      <%= title %>
+    </title>
+
+    <meta charset="UTF-8" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="" />
+
+    <!--favicon-->
+    <link rel="shortcut icon" href="" />
+    <link rel="icon" href="" type="image/x-icon" />
+
+    <!--style-->
+    <link rel="stylesheet" href="<%- url %>/inc/template/style.css" />
+
+    <!--script-->
+    <script type="text/javascript">
+    </script>
+</head>
+<body>
+
+    <div id="wrap">
+        <div id="header">
+            <h1><a href="<%- url %>"><%= title %></a></h1>
+            <ul>
+                <%- page_links %>
+                <% if have_posts then %>
+                <li><a href="<%- url %>/index.xml">RSS Feed</a></li>
+                <% end %>
+            </ul>
+        </div><!--end header-->

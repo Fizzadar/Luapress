@@ -21,6 +21,7 @@ dependencies = {
     'discount',
     'luafilesystem',
     'lustache',
+    'etlua',
 }
 
 build = {

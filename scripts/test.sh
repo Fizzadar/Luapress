@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 
-TESTS=("blog" "gallery" "index" "directories" "envs" "sticky" "lhtml")
+TESTS=("blog" "gallery" "index" "directories" "envs" "sticky" "lhtml" "etlua")
 
 
 # Exit on error
@@ -27,7 +27,7 @@ for TEST in ${TESTS[*]}; do
                 sh cleanup_test.sh
             else
                 # Remove build/
-                rm -rf build/
+                rm -rf build/ templates/ inc/
             fi
 
             # Autogenerate config.lua & build site

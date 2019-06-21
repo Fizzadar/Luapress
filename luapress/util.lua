@@ -305,7 +305,7 @@ end
 
 
 ---
--- Loads all .mustache & .lhtml files from a template directory
+-- Loads all .mustache, .etlua & .lhtml files from a template directory
 --
 local function load_templates()
     local templates = {}
@@ -313,7 +313,7 @@ local function load_templates()
 
     for file in lfs.dir(directory) do
         -- Mustache templates take prioritry
-        for _, extension in pairs({'mustache', 'lhtml'}) do
+        for _, extension in pairs({'mustache', 'lhtml', 'etlua'}) do
             if file:sub(-#extension) == extension then
                 local tmpl_name = file:sub(0, -(#extension + 2))
 
