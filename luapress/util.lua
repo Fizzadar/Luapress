@@ -54,7 +54,7 @@ end
 local function markdown(s)
     local unpack_func = unpack or table.unpack
     local data = discount.compile(s, unpack_func(config.discount_options))
-    return data.body
+    return data.body, data.index  -- return both body + TOC
 end
 
 
@@ -220,7 +220,15 @@ local function _process_content(s, item)
         counter = counter + 1
     end
 
-    item.content = markdown(s)
+    s, toc = markdown(s)
+
+    -- Swap in any $=toc
+    if toc then
+        s = s:gsub('%$=toc', toc)
+    end
+
+    item.content = s
+    item.toc = toc
 end
 
 
