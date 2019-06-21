@@ -1,12 +1,23 @@
-# 3.5.2
+# v4.0 (WIP)
+
+Breaking:
+
++ Only parse `$key=value` lines at the top of markdown files
+
+The rest:
+
++ Add `toc` support (`$=toc` in post or `page.toc` in template)
+
+
+# v3.5.2
 
 + Fix for Lua 5.1 (`unpack` not `table.unpack`)
 
-# 3.5.1
+# v3.5.1
 
 + @yuigoto fix `package.path` on Windows 10
 
-# 3.5
+# v3.5
 
 + Replace `markdown.lua` with `lua-discount`
 + Add `discount_options` configuration setting
@@ -67,6 +78,7 @@ The rest:
 + Remove `alt_getopt` and handle args manually
 + Nicer (colored, where possible) terminal output
 
+
 # v2.1.1
 
 + Add `config.posts_dir` and `config.pages_dir`
@@ -106,6 +118,7 @@ Many thanks to GitHub user w-oertl for contributing most of this release.
 + Bin executable
 + `luapress init <url>` functionality
 + Rewritten, broken up into utils
+
 
 # v1.1.2
 
