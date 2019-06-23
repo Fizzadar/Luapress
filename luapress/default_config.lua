@@ -2,6 +2,12 @@
 -- File: luapress/default_config.lua
 -- Desc: the default config we use to generate local config.lua's
 
+
+local function get_permalink(item)
+    return item.name:gsub(' ', '_')
+end
+
+
 local config = {
     -- Url
     url = nil,
@@ -30,13 +36,17 @@ local config = {
     -- Separator to replace --MORE-- instances with
     more_separator = '',
 
+    -- Format functions for permalinks (dir names or html filenames)
+    get_page_permalink = get_permalink,
+    get_post_permalink = get_permalink,
+
     -- Link directories not files
-    -- (ie /posts/<name>/index.html over /posts/<name>.html)
+    -- (ie /posts/<permalink>/index.html over /posts/<permalink>.html)
     link_dirs = true,
 
-    -- Generate pages at /pages/<name>
+    -- Generate pages at /pages/<permalink>
     pages_dir = 'pages',
-    -- Generate posts at /posts/<name>
+    -- Generate posts at /posts/<permalink>
     posts_dir = 'posts',
 
     -- Select a page as the landing page (optional, no path or suffix)

@@ -195,14 +195,14 @@ local function build()
 
     -- Load the posts and sort by timestamp
     print('[2] Loading posts')
-    local posts = util.load_markdowns('posts', 'post')
+    local posts = util.load_markdowns('posts', 'post', config.get_post_permalink)
     table.sort(posts, function(a, b)
         return tonumber(a.time) > tonumber(b.time)
     end)
 
     -- Load the pages and sort by order
     print('[3] Loading pages')
-    local pages = util.load_markdowns('pages', 'page')
+    local pages = util.load_markdowns('pages', 'page', config.get_page_permalink)
     table.sort(pages, function(a, b)
         return (tonumber(a.order) or 0) < (tonumber(b.order) or 0)
     end)
@@ -211,15 +211,20 @@ local function build()
     if #posts > 0 then
         template:set('posts', posts)
         template:set('page', {title = config.archive_title})
-        table.insert(pages, {
-            link = 'archive' .. (config.link_dirs and '' or '.html'),
+        local archive_page = {
             title = config.archive_title,
             time = os.time(),
             content = template:process(templates.archive),
             template = 'page',
             directory = config.pages_dir,
             name = 'archive',
-        })
+        }
+        local link = config.get_page_permalink(archive_page)
+        if not config.link_dirs then
+            link = link .. '.html'
+        end
+        archive_page.link = link
+        table.insert(pages, archive_page)
     end
 
     -- Process cross references

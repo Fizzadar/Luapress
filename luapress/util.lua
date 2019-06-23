@@ -240,7 +240,7 @@ end
 -- @param template  'page' or 'post'
 -- @return  Table of items
 --
-local function load_markdowns(directory, template)
+local function load_markdowns(directory, template, get_item_permalink)
     local items = {}
     local out_directory = config[directory .. '_dir']
 
@@ -262,12 +262,6 @@ local function load_markdowns(directory, template)
             local file2 = config.root .. "/" .. directory .. '/' .. file
             local attributes = lfs.attributes(file2)
 
-            -- Work out link
-            local link = fname:gsub(' ', '_')
-            if not config.link_dirs then
-                link = link .. '.html'
-            end
-
             -- Get basic attributes
             local item = {
                 source = directory .. '/' .. file, -- for error messages
@@ -280,6 +274,13 @@ local function load_markdowns(directory, template)
                 modification = attributes.modification, -- stored separately as time can be overwritten w/$time=
                 template = template, -- what template will be used (type of item)
             }
+
+            -- Use item to generate it's link
+            local link = get_item_permalink(item)
+            if not config.link_dirs then
+                link = link .. '.html'
+            end
+            item.link = link
 
             -- Now read the file
             local f = assert(io.open(file2, 'r'))
