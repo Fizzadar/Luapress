@@ -213,6 +213,12 @@ local function _process_content(s, item)
         s = s:gsub('%-%-MORE%-%-', '<a id="more">' .. sep .. '</a>')
     end
 
+    -- Swap in any $=toc - we *ignore* the HTML at this stage
+    _, toc = markdown(s)
+    if toc then
+        s = s:gsub('%$=toc', toc)
+    end
+
     -- Now we've processed internal extras, restore $raw$ blocks
     local counter = 0
     for block in s:gmatch('%$raw%$') do
@@ -220,12 +226,8 @@ local function _process_content(s, item)
         counter = counter + 1
     end
 
-    s, toc = markdown(s)
-
-    -- Swap in any $=toc
-    if toc then
-        s = s:gsub('%$=toc', toc)
-    end
+    -- Now we've done the internal extras, actually markdown it!
+    s, _ = markdown(s)
 
     item.content = s
     item.toc = toc
