@@ -1,12 +1,15 @@
-# v4.0 (WIP)
+# v4.0
 
 Breaking:
 
 + Only parse `$key=value` lines at the top of markdown files
++ Replace CLI arg `--lhtml` with `--template [mustache|lhtml|etlua]`
 
 The rest:
 
++ Add `etlua` templating support @JordanMajd
 + Add `toc` support (`$=toc` in post or `page.toc` in template)
++ Add `get_page_permalink` and `get_post_permalink` config options
 
 
 # v3.5.2
