@@ -239,6 +239,11 @@ local function build()
     -- Page links shared between all posts
     template:set('page_links', util.page_links(pages, nil))
 
+    if #posts > 0 then
+        template:set('first_post', config.posts_dir .. '/' ..  posts[#posts].link)
+        template:set('last_post', config.posts_dir .. '/' ..  posts[1].link)
+    end
+
     for k=1,#posts do
         -- Work out next post
         if posts[k-1] then
