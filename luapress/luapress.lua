@@ -32,18 +32,20 @@ local function build_index(pages, posts, templates)
         local index_page
 
         -- If specified, we'll use the defined page
-        if config.index_page then
-            -- Use specified page
-            for _, page in ipairs(pages) do
-                if page.name == config.index_page then
-                    index_page = page
-                    break
+        if not config.index_latest_post then
+            if config.index_page then
+                -- Use specified page
+                for _, page in ipairs(pages) do
+                    if page.name == config.index_page then
+                        index_page = page
+                        break
+                    end
                 end
-            end
 
-        -- Else we use first page
-        else
-            index_page = pages[1]
+            -- Else we use first page
+            else
+                index_page = pages[1]
+            end
         end
 
         -- The "copy file" part of util.copy_dir could be refactored into
@@ -52,6 +54,15 @@ local function build_index(pages, posts, templates)
             -- Work out built file location
             local bdir = config.root .. '/' .. config.build_dir .. '/'
             local filename = bdir .. config.pages_dir .. '/' .. index_page.link
+            if config.link_dirs then
+                filename = filename .. '/index.html'
+            end
+
+            util.copy_file(filename, bdir .. 'index.html')
+        elseif config.index_latest_post then
+            index_page = posts[1]
+            local bdir = config.root .. '/' .. config.build_dir .. '/'
+            local filename = bdir .. config.posts_dir .. '/' .. index_page.link
             if config.link_dirs then
                 filename = filename .. '/index.html'
             end
