@@ -171,6 +171,12 @@ local function _process_plugins(s, out)
 end
 
 
+local quotepattern = '(['..("%^$().[]*+-?"):gsub("(.)", "%%%1")..'])'
+local function _quote_string(str)
+    return str:gsub(quotepattern, "%%%1")
+end
+
+
 local function _process_content(s, item)
     blocks = {}
 
@@ -193,7 +199,7 @@ local function _process_content(s, item)
             break
         end
         item[k] = v
-        s = s:gsub(line .. '\n', '')
+        s = s:gsub(_quote_string(line) .. '\n', '')
     end
 
     -- Swap out XREFs
