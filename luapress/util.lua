@@ -215,9 +215,8 @@ local function _process_content(s, item)
 
     -- Swap in any $=toc - we *ignore* the HTML at this stage
     _, toc = markdown(s)
-    if toc then
-        s = s:gsub('%$=toc', toc)
-    end
+    toc = toc or ''
+    s = s:gsub('%$=toc', toc)
 
     -- Now we've processed internal extras, restore $raw$ blocks
     local counter = 0
