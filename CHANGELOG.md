@@ -1,3 +1,9 @@
+# v4.0.1
+
++ Fix/tidy previous/next post links (@sharpobject)
++ Always replace `$=toc`, even if there's no TOC
++ Fix replacement of `$key=value` items within posts
+
 # v4.0
 
 Breaking:
