@@ -124,6 +124,8 @@ local function page_links(pages, active)
 end
 
 
+local plugins = {}
+
 ---
 -- Process calls to plugins: $! plugin arg, arg... !$
 --
@@ -132,39 +134,42 @@ end
 -- @result  Processed string
 --
 local function _process_plugins(s, out)
-    local pos = 1
-    while pos < #s do
-    local a, b = s:find('\n%$!.-!%$', pos)
-    if not a then break end
-    local s2 = s:sub(a + 3, b - 2)
-    local pl, arg = s2:match('^ *(%w+) *(.*)$')
-    if not pl then
-        cli.error('Empty plugin call in ' .. out.source)
-    end
+    while true do
+        local a, b = s:find('\n%$!.-!%$')
+        if not a then break end
+        local s2 = s:sub(a + 3, b - 2)
+        local pl, arg = s2:match('^ *(%w+) *(.*)$')
+        if not pl then
+            cli.error('Empty plugin call in ' .. out.source)
+        end
 
-    -- Support for Lua 5.3+
-    local load_func = loadstring or load
+        -- Support for Lua 5.3+
+        local load_func = loadstring or load
 
-    -- convert args to a table
-    if #arg > 0 then
-        arg = load_func("return { " .. arg .. "}")()
-    else
-        arg = {}
-    end
+        -- convert args to a table
+        if #arg > 0 then
+            arg = load_func("return { " .. arg .. "}")()
+        else
+            arg = {}
+        end
 
-    -- load the plugin either from the site directory or the install directory
-    local path = 'plugins/' .. pl
-    if not lfs.attributes(path .. '/init.lua', "mode") then
-        path = config.base .. '/plugins/' .. pl
-    end
+        if not plugins[pl] then
+            -- load the plugin either from the site directory or the install directory
+            local path = 'plugins/' .. pl
+            if not lfs.attributes(path .. '/init.lua', "mode") then
+                path = config.base .. '/plugins/' .. pl
+            end
 
-    local plugin = loadfile(path .. '/init.lua')()
+            print(path)
+            local plugin = loadfile(path .. '/init.lua')()
+            plugins[pl] = {path, plugin}
+        end
+        local path, plugin = unpack(plugins[pl])
 
-    -- execute the plugin, replace markup by result
-    arg.plugin_path = path
-    local res = plugin(out, arg)
-    s = s:sub(1, a - 1) .. res .. s:sub(b + 1)
-    pos = a + #res
+        -- execute the plugin, replace markup by result
+        arg.plugin_path = path
+        local res = plugin(out, arg)
+        s = s:sub(1, a - 1) .. res .. s:sub(b + 1)
     end
 
     return s
