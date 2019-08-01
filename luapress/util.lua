@@ -177,6 +177,14 @@ local function _quote_string(str)
 end
 
 
+local function set_time_from_date(item)
+    if item.date then
+        local _, _, d, m, y = item.date:find('(%d+)%/(%d+)%/(%d+)')
+        item.time = os.time({day = d, month = m, year = y})
+    end
+end
+
+
 local function _process_content(s, item)
     blocks = {}
 
@@ -205,7 +213,10 @@ local function _process_content(s, item)
     -- Swap out XREFs
     s = s:gsub('%[=(.-)%]', '[XREF=%1]')
 
-    -- Hande plugins
+    -- Set time from date for use by plugins
+    set_time_from_date(item)
+
+    -- Handle plugins
     s = _process_plugins(s, item)
 
     -- Excerpt
@@ -295,12 +306,6 @@ local function load_markdowns(directory, template, get_item_permalink)
 
             -- Parse out internal extras and then markdown it
             _process_content(s, item)
-
-            -- Date set?
-            if item.date then
-                local _, _, d, m, y = item.date:find('(%d+)%/(%d+)%/(%d+)')
-                item.time = os.time({day = d, month = m, year = y})
-            end
 
             -- Insert to items
             items[#items + 1] = item
