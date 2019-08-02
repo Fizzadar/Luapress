@@ -199,7 +199,7 @@ local function _process_content(s, item)
     -- Get $key=value's (at the top of the file) and remove from string
     lines = split(s, '\n')
     for i, line in ipairs(lines) do
-        k, v = line:match('%$([%w]+)=(.+)')
+        k, v = line:match('%$([%w_]+)=(.+)')
         if not k then  -- break on the first non-matching line (variables at top!)
             break
         end
