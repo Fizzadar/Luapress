@@ -160,7 +160,6 @@ local function _process_plugins(s, out)
                 path = config.base .. '/plugins/' .. pl
             end
 
-            print(path)
             local plugin = loadfile(path .. '/init.lua')()
             plugins[pl] = {path, plugin}
         end
