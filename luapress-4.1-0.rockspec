@@ -1,9 +1,9 @@
 package = 'Luapress'
-version = '4.0.1-0'
+version = '4.1-0'
 
 source = {
     url = 'git://github.com/Fizzadar/Luapress.git',
-    tag = 'v4.0.1',
+    tag = 'v4.1',
 }
 
 description = {

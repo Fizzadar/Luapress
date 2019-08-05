@@ -1,3 +1,13 @@
+# v4.1
+
+Special thanks to @sharpobject!
+
++ Add `index_latest_post` config option (@sharpobject)
++ Add `first_post` and `last_post` template variables (@sharpobject)
++ Allow variables with underscores (@sharpobject)
++ Process dates before plugins (@sharpobject)
++ Don't load plugins multiple times (@sharpobject)
+
 # v4.0.1
 
 + Fix/tidy previous/next post links (@sharpobject)
