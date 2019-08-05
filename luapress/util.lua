@@ -9,13 +9,13 @@ local pairs = pairs
 local error = error
 local table = table
 local string = string
+local unpack = unpack or table.unpack
 
 local discount = require('discount')
 local lfs = require('lfs')
 
 local template = require('luapress.template')
 local cli = require('luapress.lib.cli')
-
 
 -- Get the Luapress install directory (where being executed from)
 local function get_install_dir()
@@ -52,8 +52,7 @@ end
 
 -- Turns a string into markdown using discount
 local function markdown(s)
-    local unpack_func = unpack or table.unpack
-    local data = discount.compile(s, unpack_func(config.discount_options))
+    local data = discount.compile(s, unpack(config.discount_options))
     return data.body, data.index  -- return both body + TOC
 end
 
