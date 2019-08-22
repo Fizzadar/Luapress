@@ -222,6 +222,11 @@ local function _process_content(s, item)
     -- Handle plugins
     s = _process_plugins(s, item)
 
+    -- Swap in any $=toc - we *ignore* the HTML at this stage
+    _, toc = markdown(s)
+    toc = toc or ''
+    s = s:gsub('%$=toc', toc)
+
     -- Excerpt
     local start, _ = s:find('%-%-MORE%-%-', 1)
 
@@ -232,11 +237,6 @@ local function _process_content(s, item)
         local sep = config.more_separator or ''
         s = s:gsub('%-%-MORE%-%-', '<a id="more">' .. sep .. '</a>')
     end
-
-    -- Swap in any $=toc - we *ignore* the HTML at this stage
-    _, toc = markdown(s)
-    toc = toc or ''
-    s = s:gsub('%$=toc', toc)
 
     -- Now we've processed internal extras, restore $raw$ blocks
     local counter = 0
