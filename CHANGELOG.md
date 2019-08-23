@@ -1,3 +1,8 @@
+# v4.1.1
+
++ Fix argument parsing with `--<key> <value>` style arguments
++ Fix rendering of TOC in posts w/`--MORE--`
+
 # v4.1
 
 Special thanks to @sharpobject!
