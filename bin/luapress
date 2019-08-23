@@ -51,22 +51,33 @@ local opts = {
 
 -- Parse named/boolean opts, capture other opts
 new_arg = {}
-arg_to_opt = {
+flag_arg_to_opt = {
     ['--watch'] = 'watch',
     ['init'] = 'init',
     ['-h'] = 'help',
     ['--help'] = 'help',
     ['--version'] = 'version',
+}
+value_arg_to_opt = {
     ['--template'] = 'custom_template',
 }
 
+value_arg_key = false
 for key, value in ipairs(arg) do
-    if arg_to_opt[value] then
-        opts[arg_to_opt[value]] = true
+    if flag_arg_to_opt[value] then
+        opts[flag_arg_to_opt[value]] = true
+
+    elseif value_arg_to_opt[value] then
+        value_arg_key = value_arg_to_opt[value]
 
     -- Unknown arg? Attach to new_arg
     else
-        table.insert(new_arg, value)
+        if value_arg_key then
+            opts[value_arg_key] = value
+            value_arg_key = nil
+        else
+            table.insert(new_arg, value)
+        end
     end
 end
 
@@ -90,20 +101,17 @@ local luapress = require('luapress')
 -- Get and validate template type
 local template_type = 'mustache'
 if opts.custom_template then
-
-    template_type = new_arg[2]
-
     local is_valid = false
     local valid_types = {'mustache', 'lhtml', 'etlua'}
 
-    for _, value in ipairs(arg) do
-        if template_type == value then
+    for _, value in ipairs(valid_types) do
+        if opts.custom_template == value then
             is_valid = true
             break
         end
     end
 
-    if not is_valid then 
+    if not is_valid then
         cli.error('Invalid template parameter, please specify mustache, lhtml or etlua ')
     end
 end
