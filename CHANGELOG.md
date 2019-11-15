@@ -1,3 +1,7 @@
+# v4.1.2
+
++ Fix/hide TOC rendering on index pages
+
 # v4.1.1
 
 + Fix argument parsing with `--<key> <value>` style arguments
