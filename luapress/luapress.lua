@@ -270,6 +270,12 @@ local function build()
         end
         -- Attach the post & output the file
         local post = posts[k]
+        -- Swap out the TOC when present - we do this here because we only want
+        -- the TOC on single post pages, not index pages.
+        post.content = post.content:gsub('%$=toc', post.toc)
+        -- Now *remove* the $=toc anywhere in the original post, before indexes
+        posts[k].content = posts[k].content:gsub('%$=toc', '')
+
         template:set('post', post)
         local dest_file = util.ensure_destination(post)
         util.write_html(dest_file, post, templates)
