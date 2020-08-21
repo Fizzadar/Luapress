@@ -1,5 +1,7 @@
 # Luapress v4
 
+> Due to lack of time, I am no longer actively working on Luapress. I will happily review, merge & release pull requests.
+
 Luapress is *yet another* static site generator, written in Lua, with posts in markdown. It's simple, fast and supports both plugins and templates.
 
 
