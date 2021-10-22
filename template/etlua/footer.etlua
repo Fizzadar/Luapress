@@ -1,6 +1,6 @@
         <div class="biglinks">
           <% if previous_page then %>
-              <a class="left" href="<%- url %>/<% -previous_page %>">&larr; Previous Page</a>
+              <a class="left" href="<%- url %>/<%- previous_page %>">&larr; Previous Page</a>
           <% end %>
           <% if next_page then %>
               <a class="right" href="<%- url %>/<%- next_page %>">Next Page &rarr;</a>

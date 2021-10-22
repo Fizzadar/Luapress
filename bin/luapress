@@ -106,6 +106,7 @@ if opts.custom_template then
 
     for _, value in ipairs(valid_types) do
         if opts.custom_template == value then
+            template_type = opts.custom_template
             is_valid = true
             break
         end
